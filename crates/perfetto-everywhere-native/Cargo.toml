@@ -1,0 +1,15 @@
+[package]
+name = "perfetto-everywhere-native"
+description = "Native in-process Perfetto backend for perfetto-everywhere"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "../../README.md"
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+perfetto-everywhere-core.workspace = true

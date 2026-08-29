@@ -1,0 +1,25 @@
+[package]
+name = "perfetto-everywhere"
+description = "Unified Perfetto tracing for native Rust, browser Workers, and AudioWorklets"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "../../README.md"
+keywords.workspace = true
+categories.workspace = true
+
+[features]
+default = []
+disabled = []
+
+[dependencies]
+perfetto-everywhere-core.workspace = true
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+perfetto-everywhere-native.workspace = true
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+perfetto-everywhere-web.workspace = true
