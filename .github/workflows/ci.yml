@@ -40,8 +40,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Native release build
-        run: cargo build --release --workspace
+      - name: Native release build and disabled contract
+        run: |
+          cargo build --release --workspace
+          cargo check -p perfetto-everywhere --features disabled --examples
 
   wasm:
     runs-on: ubuntu-latest
@@ -57,3 +59,7 @@ jobs:
           -p perfetto-everywhere-web
           -p perfetto-everywhere-collector
           -p perfetto-everywhere-tracing
+      - name: WASM disabled API contract
+        run: >-
+          cargo check --target wasm32-unknown-unknown
+          -p perfetto-everywhere --features disabled --examples
