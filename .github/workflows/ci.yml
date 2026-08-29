@@ -44,6 +44,15 @@ jobs:
         run: |
           cargo build --release --workspace
           cargo check -p perfetto-everywhere --features disabled --examples
+      - name: Native capture and Trace Processor acceptance
+        run: |
+          scripts/run-native-example.sh artifacts
+          scripts/validate-native.sh
+      - name: Native overhead sanity check
+        env:
+          ITERATIONS: "10000"
+          REPETITIONS: "1"
+        run: scripts/benchmark-native.sh artifacts
 
   wasm:
     runs-on: ubuntu-latest

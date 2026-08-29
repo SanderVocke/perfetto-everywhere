@@ -35,6 +35,7 @@
           curl
           git
           gh
+          time
           wasm-bindgen-cli
         ];
         LIBCLANG_PATH = "${pkgs.llvmPackages.libclang.lib}/lib";

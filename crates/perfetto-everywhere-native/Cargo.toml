@@ -13,3 +13,4 @@ categories.workspace = true
 
 [dependencies]
 perfetto-everywhere-core.workspace = true
+perfetto-sdk = "=1.1.1"

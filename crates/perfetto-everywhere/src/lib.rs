@@ -4,7 +4,9 @@
 pub use perfetto_everywhere_core::*;
 
 #[cfg(all(not(feature = "disabled"), not(target_arch = "wasm32")))]
-pub use perfetto_everywhere_native as platform;
+pub use perfetto_everywhere_native::{
+    CaptureConfig, CaptureReport, CaptureSession, NativeBackend as PlatformBackend, NativeError,
+};
 #[cfg(all(not(feature = "disabled"), target_arch = "wasm32"))]
 pub use perfetto_everywhere_web as platform;
 

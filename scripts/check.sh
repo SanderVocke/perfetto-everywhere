@@ -16,3 +16,6 @@ cargo build --release --target wasm32-unknown-unknown \
 for manifest in crates/*/Cargo.toml; do
   cargo package --manifest-path "$manifest" --list --allow-dirty >/dev/null
 done
+scripts/run-native-example.sh artifacts
+scripts/validate-native.sh
+ITERATIONS=10000 REPETITIONS=1 scripts/benchmark-native.sh artifacts

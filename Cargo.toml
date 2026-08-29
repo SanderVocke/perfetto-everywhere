@@ -7,6 +7,7 @@ members = [
   "crates/perfetto-everywhere-web",
   "crates/perfetto-everywhere-collector",
   "crates/perfetto-everywhere-tracing",
+  "examples/native-capture",
 ]
 
 [workspace.package]
