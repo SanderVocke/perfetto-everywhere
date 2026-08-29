@@ -12,5 +12,5 @@ cargo build --release --target wasm32-unknown-unknown \
   -p perfetto-everywhere-collector \
   -p perfetto-everywhere-tracing
 for manifest in crates/*/Cargo.toml; do
-  cargo package --manifest-path "$manifest" --no-verify
- done
+  cargo package --manifest-path "$manifest" --list >/dev/null
+done
