@@ -38,7 +38,7 @@ cleanup() {
     echo "--- browser log ---" >&2
     cat "$browser_log" >&2
   fi
-  rm -rf "$profile" "$server_log" "$browser_log"
+  rm -rf "$profile" "$server_log" "$browser_log" 2>/dev/null || true
   exit "$status"
 }
 trap cleanup EXIT
