@@ -23,3 +23,5 @@ scripts/validate-collector.sh artifacts
 scripts/run-ordinary-browser.sh artifacts
 AUDIO_DURATION_MS=3000 scripts/run-audio-browser.sh artifacts
 scripts/validate-audio.sh artifacts
+scripts/run-browser-multirealm.sh artifacts
+scripts/validate-browser-multirealm.sh artifacts

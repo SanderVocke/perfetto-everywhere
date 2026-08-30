@@ -92,6 +92,10 @@ jobs:
         run: |
           scripts/run-audio-browser.sh artifacts
           scripts/validate-audio.sh artifacts
+      - name: Complete multirealm browser acceptance
+        run: |
+          scripts/run-browser-multirealm.sh artifacts
+          scripts/validate-browser-multirealm.sh artifacts
 
   wasm:
     runs-on: ubuntu-latest

@@ -8,7 +8,9 @@ use perfetto_everywhere_web::{OrdinaryBackend, PerformanceClock};
 use wasm_bindgen::prelude::*;
 
 const APP: Category = Category::new("browser-test");
-const TASK: StaticName = StaticName::new("ordinary task");
+const PAGE_TASK: StaticName = StaticName::new("request graph rebuild");
+const WORKER_TASK: StaticName = StaticName::new("compile graph");
+const OTHER_TASK: StaticName = StaticName::new("ordinary task");
 const HEARTBEAT: StaticName = StaticName::new("heartbeat");
 const COUNTER: StaticName = StaticName::new("worker counter");
 const TARGET: StaticName = StaticName::new("ordinary producer");
@@ -22,8 +24,13 @@ pub fn produce(realm: u32, flow: u64) -> Result<Vec<u8>, JsValue> {
     let tracer = Tracer::new(backend);
     let fields = [Field::new(REALM_FIELD, FieldValue::U64(u64::from(realm)))];
     let flow = FlowId::new(flow).map_or(FlowAttachment::None, FlowAttachment::Step);
+    let task = match realm {
+        1 => PAGE_TASK,
+        2 => WORKER_TASK,
+        _ => OTHER_TASK,
+    };
     {
-        let _span = tracer.span_on(APP, TASK, TrackId::CURRENT, &fields, flow);
+        let _span = tracer.span_on(APP, task, TrackId::CURRENT, &fields, flow);
         let _ = tracer.event(APP, HEARTBEAT, &fields);
         let _ = tracer.counter_i64(COUNTER, TrackId(1), i64::from(realm));
         let _ = tracer.log(Severity::Info, TARGET, MESSAGE, &fields);

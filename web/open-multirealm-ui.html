@@ -1,0 +1,20 @@
+<!doctype html>
+<meta charset="utf-8"><title>perfetto-everywhere trace in Perfetto UI</title>
+<style>html,body,iframe{border:0;margin:0;width:100%;height:100%;overflow:hidden}#status{position:fixed;z-index:2;right:8px;top:8px;background:white;padding:4px}</style>
+<div id="status">waiting</div><iframe id="ui" src="https://ui.perfetto.dev/#!/?mode=embedded"></iframe>
+<script type="module">
+const origin = "https://ui.perfetto.dev";
+const frame = document.getElementById("ui");
+const status = document.getElementById("status");
+const bytes = await fetch("/artifacts/browser-multirealm.pftrace").then(response => response.arrayBuffer());
+const ping = setInterval(() => frame.contentWindow.postMessage("PING", origin), 100);
+window.addEventListener("message", event => {
+  if (event.source !== frame.contentWindow || event.data !== "PONG") return;
+  clearInterval(ping);
+  status.textContent = "trace submitted";
+  frame.contentWindow.postMessage({perfetto: {
+    buffer: bytes, title: "perfetto-everywhere multirealm example",
+    fileName: "browser-multirealm.pftrace", localOnly: true,
+  }}, origin, [bytes]);
+});
+</script>

@@ -1,0 +1,167 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>perfetto-everywhere multirealm example</title>
+<h1>perfetto-everywhere multirealm example</h1>
+<div id="status">starting</div><div id="download"></div>
+<pre id="summary"></pre><pre id="error"></pre><div id="trace" hidden></div>
+<script type="module">
+import initProducer, { produce } from "./pkg/ordinary/ordinary_browser_producer.js";
+import {
+  BrowserCaptureController, metadataEntries, ordinaryCalibration, audioCalibration,
+  traceDownload, waitMessage,
+} from "./perfetto-browser-runtime.js";
+const SAMPLE_RATE = 48000;
+const QUANTUM = 128;
+const durationMs = Number(new URL(location.href).searchParams.get("duration") || 2000);
+function toBase64(bytes) {
+  let binary = "";
+  for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+  }
+  return btoa(binary);
+}
+function allMetadata() {
+  return metadataEntries([
+    [1, "request graph rebuild"], [1, "compile graph"], [1, "ordinary task"],
+    [1, "heartbeat"], [1, "worker counter"], [1, "ordinary producer"],
+    [1, "worker ready"], [2, "browser-test"], [3, "realm"],
+    [1, "audio process quantum"], [1, "audio queue depth"],
+    [1, "audio cpu load"], [1, "audio graph installed"], [2, "audio"],
+  ]);
+}
+async function workerCalibration(worker, realm, id) {
+  const sent = performance.timeOrigin + performance.now();
+  const pending = waitMessage(worker, data => data.type === "clock-pong" && data.id === id);
+  worker.postMessage({type: "clock-ping", id});
+  const pong = await pending;
+  const received = performance.timeOrigin + performance.now();
+  return ordinaryCalibration(
+    realm, realm + 100, pong.localMs, pong.referenceMs, (received - sent) / 2,
+  );
+}
+function pageCalibration() {
+  const localMs = performance.now();
+  return ordinaryCalibration(
+    1, 101, localMs, performance.timeOrigin + localMs, 0.001,
+  );
+}
+async function main() {
+  if (!crossOriginIsolated || typeof SharedArrayBuffer !== "function") {
+    throw new Error("COOP/COEP and SharedArrayBuffer are required");
+  }
+  await initProducer();
+  const workers = [2, 3].map(realm => new Worker(`ordinary-worker.js?realm=${realm}`, {type: "module"}));
+  await Promise.all(workers.map(worker => waitMessage(worker, data => data.type === "ready")));
+
+  const controller = new BrowserCaptureController({
+    audioCapacity: 8192, sampleRate: SAMPLE_RATE, quantumFrames: QUANTUM,
+  });
+  for (const realm of [
+    {id: 1, label: "Window", ticksPerSecond: 1_000_000_000},
+    {id: 2, label: "Worker A", ticksPerSecond: 1_000_000_000},
+    {id: 3, label: "Worker B", ticksPerSecond: 1_000_000_000},
+    {id: 4, label: "AudioWorklet", ticksPerSecond: SAMPLE_RATE},
+  ]) controller.registerRealm(realm.id, realm.label, realm.ticksPerSecond);
+  controller.registerMetadata(allMetadata());
+  await controller.start();
+  const ring = controller.audioRing;
+
+  const calibrations = [pageCalibration()];
+  for (let index = 0; index < workers.length; index++) {
+    calibrations.push(await workerCalibration(workers[index], index + 2, 0));
+  }
+
+  const pageRecords = produce(1, 42n);
+  controller.submitRecords(1, pageRecords);
+  await new Promise(resolve => setTimeout(resolve, 10));
+  const pendingRecords = workers.map(worker => waitMessage(worker, data => data.type === "records"));
+  workers[0].postMessage({type: "produce", flow: 42n});
+  workers[1].postMessage({type: "produce", flow: 0n});
+  for (const result of await Promise.all(pendingRecords)) {
+    controller.submitRecords(result.realm, result.records);
+  }
+  calibrations.push(pageCalibration());
+  for (let index = 0; index < workers.length; index++) {
+    const sample = await workerCalibration(workers[index], index + 2, 1);
+    const previous = calibrations.filter(item => item.realm === index + 2).at(-1);
+    if (!previous || sample.sourceTicks > previous.sourceTicks) calibrations.push(sample);
+  }
+  workers.forEach(worker => worker.terminate());
+
+  const context = new AudioContext({sampleRate: SAMPLE_RATE, latencyHint: "interactive"});
+  const wasmModule = await WebAssembly.compileStreaming(
+    fetch("./pkg/audio/perfetto_everywhere_web_bg.wasm"),
+  );
+  await context.audioWorklet.addModule("perfetto-audio-worklet.js");
+  const node = new AudioWorkletNode(context, "perfetto-audio", {
+    processorOptions: {
+      sab: ring.sab, wasmModule, realmId: 4, clockId: 104, flow: 42n, record: true,
+    },
+  });
+  node.connect(context.destination);
+  node.port.start();
+  const audioReady = await waitMessage(node.port, data => data.type === "ready" || data.type === "error");
+  if (audioReady.type === "error") throw new Error(audioReady.error);
+  await context.resume();
+  await new Promise(resolve => setTimeout(resolve, 100));
+  const firstAudio = audioCalibration(context, SAMPLE_RATE);
+  const epochZero = firstAudio.referenceNs - BigInt(Math.round(firstAudio.contextTime * 1e9));
+  calibrations.push({
+    realm: 4, clock: 104, sourceTicks: 0n,
+    referenceNs: epochZero, uncertaintyNs: firstAudio.uncertaintyNs,
+  });
+  let lastAudioFrame = 0n;
+  function calibrateAudio() {
+    const sample = audioCalibration(context, SAMPLE_RATE);
+    if (sample.sourceTicks > lastAudioFrame) {
+      calibrations.push({realm: 4, clock: 104, ...sample});
+      lastAudioFrame = sample.sourceTicks;
+    }
+  }
+  calibrateAudio();
+  const calibrationTimer = setInterval(calibrateAudio, 500);
+  controller.startAudioDrain(2);
+  await new Promise(resolve => setTimeout(resolve, durationMs));
+  clearInterval(calibrationTimer);
+  calibrateAudio();
+  await context.suspend();
+  const stopped = waitMessage(node.port, data => data.type === "stopped");
+  node.port.postMessage({type: "stop"});
+  await stopped;
+  for (const sample of calibrations) controller.addCalibration(sample);
+  const result = await controller.finish();
+  const restartProbe = new BrowserCaptureController({
+    audioCapacity: 16, sampleRate: SAMPLE_RATE, quantumFrames: QUANTUM,
+  });
+  await restartProbe.start();
+  restartProbe.abort();
+  const restartVerified = true;
+  node.disconnect();
+  await context.close();
+
+  const bytes = new Uint8Array(result.trace);
+  document.getElementById("download").append(
+    traceDownload(bytes, "browser-multirealm.pftrace").anchor,
+  );
+  const summary = {
+    bytes: bytes.length,
+    ordinaryRecords: 24,
+    audioCallbacks: result.audioCallbacks,
+    audioRecords: result.audioRecords,
+    expectedAudioRecords: result.audioCallbacks * 4 + 1,
+    dropped: result.dropped,
+    discontinuities: result.discontinuities,
+    calibrations: calibrations.length,
+    restartVerified,
+  };
+  document.getElementById("trace").textContent = toBase64(bytes);
+  document.getElementById("summary").textContent = JSON.stringify(summary);
+  document.getElementById("status").textContent = "done";
+  document.title = "DONE perfetto-everywhere multirealm example";
+}
+main().catch(error => {
+  document.getElementById("error").textContent = error.stack || String(error);
+  document.getElementById("status").textContent = "failed";
+  document.title = "FAILED perfetto-everywhere multirealm example";
+});
+</script>
