@@ -1,0 +1,205 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>audio browser producer test</title>
+<pre id="status">starting</pre><pre id="summary"></pre><pre id="error"></pre>
+<div id="trace" hidden></div>
+<script type="module">
+import initAudio, { AudioRingProducer } from "./pkg/audio/perfetto_everywhere_web.js";
+const RECORD_SIZE = 48;
+const HEADER_BYTES = 64;
+const MAGIC = 0x50454631;
+const SAMPLE_RATE = 48000;
+const QUANTUM = 128;
+const durationMs = Number(new URL(location.href).searchParams.get("duration") || 5000);
+const waitMessage = (endpoint, predicate) => new Promise(resolve => {
+  const listener = event => {
+    if (!predicate(event.data)) return;
+    endpoint.removeEventListener("message", listener);
+    resolve(event.data);
+  };
+  endpoint.addEventListener("message", listener);
+});
+function makeRing(capacity) {
+  const sab = new SharedArrayBuffer(HEADER_BYTES + capacity * RECORD_SIZE);
+  const header = new Int32Array(sab, 0, 16);
+  header[0] = MAGIC;
+  header[1] = capacity;
+  header[9] = SAMPLE_RATE;
+  header[10] = QUANTUM;
+  return {sab, header};
+}
+function metadataId(namespace, label) {
+  let hash = (0x811c9dc5 ^ namespace) >>> 0;
+  for (const byte of new TextEncoder().encode(label)) {
+    hash = Math.imul((hash ^ byte) >>> 0, 0x01000193) >>> 0;
+  }
+  return hash || 1;
+}
+function metadata() {
+  return [
+    [1, "audio process quantum"], [1, "audio queue depth"],
+    [1, "audio cpu load"], [1, "audio graph installed"], [2, "audio"],
+  ].map(([namespace, label]) => ({id: metadataId(namespace, label), namespace, label}));
+}
+function toBase64(bytes) {
+  let binary = "";
+  for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+  }
+  return btoa(binary);
+}
+function outputSample(context) {
+  if (typeof context.getOutputTimestamp === "function") {
+    const sample = context.getOutputTimestamp();
+    return {
+      sourceFrame: BigInt(Math.round(sample.contextTime * SAMPLE_RATE)),
+      referenceNs: BigInt(Math.round((performance.timeOrigin + sample.performanceTime) * 1e6)),
+      uncertaintyNs: 100_000n,
+      contextTime: sample.contextTime,
+      performanceTime: sample.performanceTime,
+    };
+  }
+  const before = performance.timeOrigin + performance.now();
+  const contextTime = context.currentTime;
+  const after = performance.timeOrigin + performance.now();
+  return {
+    sourceFrame: BigInt(Math.round(contextTime * SAMPLE_RATE)),
+    referenceNs: BigInt(Math.round(((before + after) / 2) * 1e6)),
+    uncertaintyNs: BigInt(Math.max(1, Math.round(((after - before) / 2) * 1e6))),
+    contextTime,
+    performanceTime: (before + after) / 2 - performance.timeOrigin,
+  };
+}
+async function main() {
+  if (!crossOriginIsolated || typeof SharedArrayBuffer !== "function") {
+    throw new Error("cross-origin isolation unavailable");
+  }
+  await initAudio();
+
+  // Measure the exact WASM/SAB producer path outside the real-time thread.
+  const benchmarkRing = makeRing(65536);
+  const benchmarkProducer = new AudioRingProducer(benchmarkRing.sab, 44, 144);
+  const timings = [];
+  for (let index = 0; index < 10000; index++) {
+    const before = performance.now();
+    benchmarkProducer.process_quantum(index * QUANTUM, QUANTUM, index & 15, 0.25);
+    timings.push(performance.now() - before);
+  }
+  timings.sort((a, b) => a - b);
+  const benchmarkP99Ms = timings[Math.floor(timings.length * 0.99)];
+  const malformedRing = makeRing(4);
+  malformedRing.header[0] = 0;
+  let malformedRejected = false;
+  try { new AudioRingProducer(malformedRing.sab, 46, 146); } catch { malformedRejected = true; }
+  const forcedRing = makeRing(2);
+  const forcedProducer = new AudioRingProducer(forcedRing.sab, 45, 145);
+  forcedProducer.process_quantum(0, QUANTUM, 1, 0.2);
+  const forcedDropped = Atomics.load(forcedRing.header, 4) >>> 0;
+
+  const context = new AudioContext({sampleRate: SAMPLE_RATE, latencyHint: "interactive"});
+  const wasmModule = await WebAssembly.compileStreaming(
+    fetch("./pkg/audio/perfetto_everywhere_web_bg.wasm"),
+  );
+  await context.audioWorklet.addModule("perfetto-audio-worklet.js");
+
+  const baselineRing = makeRing(16);
+  const baselineNode = new AudioWorkletNode(context, "perfetto-audio", {
+    processorOptions: {
+      sab: baselineRing.sab, wasmModule, realmId: 40, clockId: 140, flow: 0n, record: false,
+    },
+  });
+  baselineNode.connect(context.destination);
+  baselineNode.port.start();
+  const baselineReady = await waitMessage(
+    baselineNode.port, data => data.type === "ready" || data.type === "error",
+  );
+  if (baselineReady.type === "error") throw new Error(baselineReady.error);
+  await context.resume();
+  await new Promise(resolve => setTimeout(resolve, durationMs));
+  await context.suspend();
+  const baselineStopped = waitMessage(baselineNode.port, data => data.type === "stopped");
+  baselineNode.port.postMessage({type: "stop"});
+  await baselineStopped;
+  baselineNode.disconnect();
+  const baselineCallbacks = Atomics.load(baselineRing.header, 5) >>> 0;
+  const baselineDiscontinuities = Atomics.load(baselineRing.header, 7) >>> 0;
+
+  const ring = makeRing(8192);
+  const collector = new Worker("audio-collector-worker.js", {type: "module"});
+  const collectorReady = waitMessage(collector, data => data.type === "ready");
+  collector.postMessage({type: "start", sab: ring.sab});
+  await collectorReady;
+  const node = new AudioWorkletNode(context, "perfetto-audio", {
+    processorOptions: {
+      sab: ring.sab, wasmModule, realmId: 4, clockId: 104, flow: 42n, record: true,
+    },
+  });
+  node.connect(context.destination);
+  node.port.start();
+  const ready = await waitMessage(node.port, data => data.type === "ready" || data.type === "error");
+  if (ready.type === "error") throw new Error(ready.error);
+  await context.resume();
+  await new Promise(resolve => setTimeout(resolve, 100));
+
+  const calibrations = [];
+  const first = outputSample(context);
+  const epochZeroNs = first.referenceNs - BigInt(Math.round(first.contextTime * 1e9));
+  calibrations.push({sourceFrame: 0n, referenceNs: epochZeroNs, uncertaintyNs: first.uncertaintyNs});
+  let lastFrame = 0n;
+  function calibrate() {
+    const sample = outputSample(context);
+    if (sample.sourceFrame > lastFrame) {
+      calibrations.push(sample);
+      lastFrame = sample.sourceFrame;
+    }
+  }
+  calibrate();
+  const calibrationTimer = setInterval(calibrate, 500);
+  const drainTimer = setInterval(() => collector.postMessage({type: "drain"}), 2);
+  await new Promise(resolve => setTimeout(resolve, durationMs));
+  clearInterval(calibrationTimer);
+  calibrate();
+  await context.suspend();
+  const stopped = waitMessage(node.port, data => data.type === "stopped");
+  node.port.postMessage({type: "stop"});
+  await stopped;
+  clearInterval(drainTimer);
+  collector.postMessage({
+    type: "finish", sampleRate: SAMPLE_RATE, metadata: metadata(), calibrations,
+  });
+  const result = await waitMessage(collector, data => data.type === "trace" || data.type === "error");
+  if (result.type === "error") throw new Error(result.error);
+  node.disconnect();
+  await context.close();
+  collector.terminate();
+
+  const trace = new Uint8Array(result.trace);
+  const summary = {
+    requestedDurationMs: durationMs,
+    baselineCallbacks,
+    baselineDiscontinuities,
+    callbacks: result.callbacks,
+    records: result.records,
+    expectedRecords: result.callbacks * 4 + 1,
+    dropped: result.dropped,
+    discontinuities: result.discontinuities,
+    highWater: result.highWater,
+    drains: result.drains,
+    calibrations: calibrations.length,
+    benchmarkP99Ms,
+    quantumBudgetMs: QUANTUM / SAMPLE_RATE * 1000,
+    forcedDropped,
+    malformedRejected,
+    traceBytes: trace.length,
+  };
+  document.getElementById("trace").textContent = toBase64(trace);
+  document.getElementById("summary").textContent = JSON.stringify(summary);
+  document.getElementById("status").textContent = "done";
+  document.title = "DONE audio browser producer test";
+}
+main().catch(error => {
+  document.getElementById("error").textContent = error.stack || String(error);
+  document.getElementById("status").textContent = "failed";
+  document.title = "FAILED audio browser producer test";
+});
+</script>

@@ -1,0 +1,44 @@
+name: Full browser acceptance
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: full-browser-acceptance
+  cancel-in-progress: false
+
+jobs:
+  audio-worklet-60s:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install browser build prerequisites
+        run: |
+          rustup target add wasm32-unknown-unknown
+          cargo install wasm-bindgen-cli --version 0.2.121 --locked
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
+      - name: Run baseline and traced 60-second cases
+        env:
+          AUDIO_DURATION_MS: "60000"
+          AUDIO_REQUIRE_FULL: "1"
+        run: |
+          scripts/run-audio-browser.sh artifacts
+          scripts/validate-audio.sh artifacts
+      - name: Upload trace, SQL, and raw measurements
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: audio-worklet-60s-${{ github.sha }}
+          path: |
+            artifacts/audio-transport.json
+            artifacts/audio-transport.pftrace
+            artifacts/audio-query.txt
+          if-no-files-found: error
+          retention-days: 30

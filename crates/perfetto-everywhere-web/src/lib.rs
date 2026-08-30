@@ -1,6 +1,12 @@
 #![doc = "Bounded browser producers for `perfetto-everywhere`."]
 #![forbid(unsafe_code)]
 
+mod audio;
+
+pub use audio::{AUDIO_HEADER_BYTES, AUDIO_HEADER_WORDS, AUDIO_RING_MAGIC, ring_can_reserve};
+#[cfg(target_arch = "wasm32")]
+pub use audio::{AudioRingBackend, AudioRingProducer};
+
 use perfetto_everywhere_core::{
     Category, EmitStatus, FLAG_FLOW_STEP, FLAG_FLOW_TERMINATE, FLAG_GROUP_END, FLAG_GROUP_START,
     Field, FieldValue, FlowAttachment, MetadataId, RECORD_SIZE, Record, RecordKind, Severity,

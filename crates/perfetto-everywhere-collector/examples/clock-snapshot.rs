@@ -58,10 +58,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     collector.register_realm(RealmDescriptor {
         id: 1,
         label: "page".to_owned(),
+        ticks_per_second: 1_000_000_000,
     })?;
     collector.register_realm(RealmDescriptor {
         id: 2,
         label: "worker".to_owned(),
+        ticks_per_second: 1_000_000_000,
     })?;
     collector.register_metadata_all(page_metadata)?;
     collector.register_metadata_all(worker_metadata)?;

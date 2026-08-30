@@ -21,12 +21,25 @@ const REFERENCE_CLOCK_ID: u32 = BuiltinClock::Boottime as u32;
 pub struct RealmDescriptor {
     pub id: u32,
     pub label: String,
+    /// Source clock ticks per second (1e9 for ordinary performance-clock ns,
+    /// sample rate for raw AudioWorklet frame timestamps).
+    pub ticks_per_second: u64,
 }
 
 #[derive(Clone, Debug)]
 struct EventGroup {
     header: Record,
     fields: Vec<Record>,
+}
+
+#[derive(Clone, Copy, Debug)]
+struct FittedCalibration {
+    source_ticks: u64,
+    source_ns: u64,
+    reference_ns: u64,
+    raw_reference_ns: u64,
+    uncertainty_ns: u64,
+    residual_ns: i64,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -117,7 +130,7 @@ impl Collector {
     }
 
     pub fn register_realm(&mut self, descriptor: RealmDescriptor) -> Result<(), CollectorError> {
-        if descriptor.id == 0 {
+        if descriptor.id == 0 || descriptor.ticks_per_second == 0 {
             return Err(CollectorError::UnknownRealm(0));
         }
         if let Some(existing) = self.realms.get(&descriptor.id) {
@@ -154,7 +167,6 @@ impl Collector {
     pub fn add_calibration(&mut self, sample: ClockCalibration) -> Result<(), CollectorError> {
         if sample.realm_id == 0
             || sample.clock_id == 0
-            || sample.source_ticks == 0
             || sample.reference_time_ns == 0
             || sample.uncertainty_ns > self.config.max_clock_uncertainty_ns
         {
@@ -219,7 +231,7 @@ impl Collector {
             (
                 group.header.realm_id,
                 group.header.timestamp,
-                group.header.kind as u8,
+                record_order(group.header.kind),
             )
         });
         self.repair_span_boundaries();
@@ -227,13 +239,14 @@ impl Collector {
             (
                 group.header.realm_id,
                 group.header.timestamp,
-                group.header.kind as u8,
+                record_order(group.header.kind),
             )
         });
 
         let mut packets = Vec::new();
         self.emit_clock_snapshots(&mut packets)?;
         self.emit_descriptors(&mut packets)?;
+        self.emit_clock_diagnostics(&mut packets)?;
         self.emit_events(&mut packets)?;
         self.emit_health(&mut packets)?;
         Ok(Trace { packet: packets }.encode_to_vec())
@@ -345,24 +358,36 @@ impl Collector {
             .ok_or(CollectorError::UnknownMetadata(id))
     }
 
+    fn fitted_calibrations(&self) -> Result<BTreeMap<u32, Vec<FittedCalibration>>, CollectorError> {
+        let mut fitted = BTreeMap::new();
+        for (realm, samples) in &self.calibrations {
+            let descriptor = self
+                .realms
+                .get(realm)
+                .ok_or(CollectorError::UnknownRealm(*realm))?;
+            fitted.insert(
+                *realm,
+                fit_clock_samples(samples, descriptor.ticks_per_second),
+            );
+        }
+        Ok(fitted)
+    }
+
     fn emit_clock_snapshots(&self, packets: &mut Vec<TracePacket>) -> Result<(), CollectorError> {
-        let reference_origin = self
-            .calibrations
+        let fitted = self.fitted_calibrations()?;
+        let reference_origin = fitted
             .values()
-            .flat_map(|samples| samples.iter().map(|sample| sample.reference_time_ns))
+            .flat_map(|samples| samples.iter().map(|sample| sample.reference_ns))
             .min()
             .ok_or(CollectorError::InvalidClockSample(0))?;
-        for (realm, samples) in &self.calibrations {
-            if !self.realms.contains_key(realm) {
-                return Err(CollectorError::UnknownRealm(*realm));
-            }
+        for (realm, samples) in fitted {
             for sample in samples {
                 let snapshot = ClockSnapshot {
                     clocks: vec![
                         clock_snapshot::Clock {
                             clock_id: Some(REFERENCE_CLOCK_ID),
                             timestamp: Some(
-                                sample.reference_time_ns.saturating_sub(reference_origin)
+                                sample.reference_ns.saturating_sub(reference_origin)
                                     + 1_000_000_000,
                             ),
                             is_incremental: Some(false),
@@ -370,7 +395,7 @@ impl Collector {
                         },
                         clock_snapshot::Clock {
                             clock_id: Some(CUSTOM_CLOCK_ID),
-                            timestamp: Some(sample.source_ticks),
+                            timestamp: Some(sample.source_ns),
                             is_incremental: Some(false),
                             unit_multiplier_ns: Some(1),
                         },
@@ -378,7 +403,7 @@ impl Collector {
                     primary_trace_clock: Some(BuiltinClock::Boottime as i32),
                 };
                 packets.push(sequence_packet(
-                    *realm,
+                    realm,
                     trace_packet::Data::ClockSnapshot(snapshot),
                 ));
             }
@@ -387,8 +412,12 @@ impl Collector {
     }
 
     fn emit_descriptors(&self, packets: &mut Vec<TracePacket>) -> Result<(), CollectorError> {
-        let mut event_tracks: BTreeSet<(u32, u64)> =
-            self.health.keys().map(|realm| (*realm, 0)).collect();
+        let mut event_tracks: BTreeSet<(u32, u64)> = self
+            .health
+            .keys()
+            .chain(self.calibrations.keys())
+            .map(|realm| (*realm, 0))
+            .collect();
         let mut counter_tracks = BTreeSet::new();
         for group in &self.groups {
             let track = if group.header.kind == RecordKind::Log {
@@ -439,6 +468,50 @@ impl Collector {
                     ..Default::default()
                 },
             )));
+        }
+        Ok(())
+    }
+
+    fn emit_clock_diagnostics(&self, packets: &mut Vec<TracePacket>) -> Result<(), CollectorError> {
+        for (realm, samples) in self.fitted_calibrations()? {
+            for sample in samples {
+                let event = TrackEvent {
+                    categories: vec!["browser.clock".to_owned()],
+                    r#type: Some(track_event::Type::Instant as i32),
+                    track_uuid: Some(event_track_uuid(realm, 0)),
+                    name_field: Some(track_event::NameField::Name("clock calibration".to_owned())),
+                    debug_annotations: vec![
+                        annotation(
+                            "raw_source_ticks",
+                            debug_annotation::Value::UintValue(sample.source_ticks),
+                        ),
+                        annotation(
+                            "raw_reference_ns",
+                            debug_annotation::Value::UintValue(sample.raw_reference_ns),
+                        ),
+                        annotation(
+                            "uncertainty_ns",
+                            debug_annotation::Value::UintValue(sample.uncertainty_ns),
+                        ),
+                        annotation(
+                            "fit_residual_ns",
+                            debug_annotation::Value::IntValue(sample.residual_ns),
+                        ),
+                    ],
+                    ..Default::default()
+                };
+                packets.push(TracePacket {
+                    timestamp: Some(sample.source_ns),
+                    timestamp_clock_id: Some(CUSTOM_CLOCK_ID),
+                    data: Some(trace_packet::Data::TrackEvent(event)),
+                    optional_trusted_packet_sequence_id: Some(
+                        trace_packet::OptionalTrustedPacketSequenceId::TrustedPacketSequenceId(
+                            realm,
+                        ),
+                    ),
+                    ..Default::default()
+                });
+            }
         }
         Ok(())
     }
@@ -543,7 +616,10 @@ impl Collector {
                 ..Default::default()
             };
             packets.push(TracePacket {
-                timestamp: Some(header.timestamp),
+                timestamp: Some(ticks_to_ns(
+                    header.timestamp,
+                    self.realms[&header.realm_id].ticks_per_second,
+                )),
                 timestamp_clock_id: Some(CUSTOM_CLOCK_ID),
                 data: Some(trace_packet::Data::TrackEvent(event)),
                 optional_trusted_packet_sequence_id: Some(
@@ -623,7 +699,7 @@ impl Collector {
                 ..Default::default()
             };
             packets.push(TracePacket {
-                timestamp: Some(timestamp),
+                timestamp: Some(ticks_to_ns(timestamp, self.realms[realm].ticks_per_second)),
                 timestamp_clock_id: Some(CUSTOM_CLOCK_ID),
                 data: Some(trace_packet::Data::TrackEvent(event)),
                 optional_trusted_packet_sequence_id: Some(
@@ -659,6 +735,53 @@ fn annotation(name: &str, value: debug_annotation::Value) -> DebugAnnotation {
         value: Some(value),
         ..Default::default()
     }
+}
+
+fn fit_clock_samples(
+    samples: &[ClockCalibration],
+    ticks_per_second: u64,
+) -> Vec<FittedCalibration> {
+    let mut offsets: Vec<i128> = samples
+        .iter()
+        .map(|sample| {
+            i128::from(sample.reference_time_ns)
+                - i128::from(ticks_to_ns(sample.source_ticks, ticks_per_second))
+        })
+        .collect();
+    offsets.sort_unstable();
+    let fitted_offset = offsets.get(offsets.len() / 2).copied().unwrap_or_default();
+    samples
+        .iter()
+        .map(|sample| {
+            let source_ns = ticks_to_ns(sample.source_ticks, ticks_per_second);
+            let predicted =
+                (i128::from(source_ns) + fitted_offset).clamp(0, i128::from(u64::MAX)) as u64;
+            let residual = (i128::from(sample.reference_time_ns) - i128::from(predicted))
+                .clamp(i128::from(i64::MIN), i128::from(i64::MAX))
+                as i64;
+            FittedCalibration {
+                source_ticks: sample.source_ticks,
+                source_ns,
+                reference_ns: predicted,
+                raw_reference_ns: sample.reference_time_ns,
+                uncertainty_ns: sample.uncertainty_ns,
+                residual_ns: residual,
+            }
+        })
+        .collect()
+}
+
+const fn record_order(kind: RecordKind) -> u8 {
+    match kind {
+        RecordKind::SpanEnd => 0,
+        RecordKind::SpanBegin => 1,
+        _ => 2,
+    }
+}
+
+fn ticks_to_ns(ticks: u64, ticks_per_second: u64) -> u64 {
+    ((u128::from(ticks) * 1_000_000_000_u128) / u128::from(ticks_per_second))
+        .min(u128::from(u64::MAX)) as u64
 }
 
 fn mix(mut value: u64) -> u64 {
@@ -700,9 +823,18 @@ mod wasm {
             }
         }
 
-        pub fn register_realm(&mut self, id: u32, label: String) -> Result<(), JsValue> {
+        pub fn register_realm(
+            &mut self,
+            id: u32,
+            label: String,
+            ticks_per_second: u64,
+        ) -> Result<(), JsValue> {
             self.inner_mut()?
-                .register_realm(RealmDescriptor { id, label })
+                .register_realm(RealmDescriptor {
+                    id,
+                    label,
+                    ticks_per_second,
+                })
                 .map_err(js_error)
         }
 
@@ -739,6 +871,28 @@ mod wasm {
                     uncertainty_ns,
                 })
                 .map_err(js_error)
+        }
+
+        pub fn set_health(
+            &mut self,
+            realm_id: u32,
+            emitted_records: u64,
+            dropped_records: u64,
+            completed_batches: u64,
+            high_water_records: usize,
+            repaired_span_boundaries: u64,
+        ) -> Result<(), JsValue> {
+            self.inner_mut()?.set_health(
+                realm_id,
+                ProducerHealth {
+                    emitted_records,
+                    dropped_records,
+                    completed_batches,
+                    high_water_records,
+                    repaired_span_boundaries,
+                },
+            );
+            Ok(())
         }
 
         pub fn ingest_batch(&mut self, bytes: &[u8]) -> Result<(), JsValue> {
@@ -801,6 +955,7 @@ mod tests {
             .register_realm(RealmDescriptor {
                 id: 1,
                 label: "page".to_owned(),
+                ticks_per_second: 1_000_000_000,
             })
             .unwrap();
         collector.register_metadata(metadata(10, "event")).unwrap();
@@ -864,6 +1019,7 @@ mod tests {
             .register_realm(RealmDescriptor {
                 id: 1,
                 label: "page".to_owned(),
+                ticks_per_second: 1_000_000_000,
             })
             .unwrap();
         missing.register_metadata(metadata(10, "event")).unwrap();
@@ -902,6 +1058,7 @@ mod tests {
             collector.register_realm(RealmDescriptor {
                 id: 1,
                 label: "different".to_owned(),
+                ticks_per_second: 1_000_000_000,
             }),
             Err(CollectorError::RealmCollision(1))
         );

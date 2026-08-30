@@ -21,3 +21,5 @@ scripts/validate-native.sh
 ITERATIONS=10000 REPETITIONS=1 scripts/benchmark-native.sh artifacts
 scripts/validate-collector.sh artifacts
 scripts/run-ordinary-browser.sh artifacts
+AUDIO_DURATION_MS=3000 scripts/run-audio-browser.sh artifacts
+scripts/validate-audio.sh artifacts

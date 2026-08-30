@@ -43,11 +43,16 @@ custom clock 64          = producer source ns
 
 All snapshots are emitted before dependent packets in the offline file. Events
 carry raw source timestamps and `timestamp_clock_id = 64`; Trace Processor
-converts them during import. Periodic snapshots give piecewise offset correction.
-The configured uncertainty ceiling rejects excessively noisy samples, but the
-snapshot does not manufacture accuracy beyond the supplied calibration.
+converts them during import. Within one continuous clock segment, the collector
+uses a robust median source/reference offset for all periodic snapshots. This
+prevents noisy observations from introducing timestamp steps into spans while
+retaining every raw observation, uncertainty, and fit residual as `clock
+calibration` events. A lifecycle/discontinuity starts a new segment in the
+higher-level runtime. The configured uncertainty ceiling rejects excessively
+noisy samples; snapshots do not manufacture accuracy beyond supplied data.
 
 The deterministic smoke trace has two realms, two snapshots each, injected
-1 ns drift, and a slice crossing a snapshot boundary. SQL verifies four
-snapshot pairs, expected piecewise timestamps/durations, counters, flow,
-nonnegative slices, and zero non-informational `clock_sync*` statistics.
+1 ns observation drift, and a slice crossing a snapshot boundary. SQL verifies
+four snapshot pairs, stable fitted timestamps/durations, calibration residuals,
+counters, flow, nonnegative slices, and zero non-informational `clock_sync*`
+statistics.
