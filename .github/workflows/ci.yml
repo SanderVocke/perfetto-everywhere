@@ -36,6 +36,15 @@ jobs:
             cargo package --manifest-path "$manifest" --list >/dev/null
           done
 
+  collector:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Collector unit and clock-snapshot acceptance
+        run: |
+          cargo test -p perfetto-everywhere-collector
+          scripts/validate-collector.sh artifacts
+
   native:
     runs-on: ubuntu-latest
     steps:

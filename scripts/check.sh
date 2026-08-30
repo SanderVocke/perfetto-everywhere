@@ -19,4 +19,5 @@ done
 scripts/run-native-example.sh artifacts
 scripts/validate-native.sh
 ITERATIONS=10000 REPETITIONS=1 scripts/benchmark-native.sh artifacts
+scripts/validate-collector.sh artifacts
 scripts/run-ordinary-browser.sh artifacts
