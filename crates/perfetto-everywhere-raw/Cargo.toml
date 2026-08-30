@@ -1,6 +1,6 @@
 [package]
-name = "perfetto-everywhere-web"
-description = "Browser and AudioWorklet producers for perfetto-everywhere"
+name = "perfetto-everywhere-raw"
+description = "Import-free bounded raw-Wasm producer for perfetto-everywhere"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -11,12 +11,5 @@ readme = "../../README.md"
 keywords.workspace = true
 categories.workspace = true
 
-[lib]
-crate-type = ["cdylib", "rlib"]
-
 [dependencies]
 perfetto-everywhere-core.workspace = true
-
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-js-sys = "=0.3.104"
-wasm-bindgen = "=0.2.127"

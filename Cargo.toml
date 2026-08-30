@@ -4,6 +4,7 @@ members = [
   "crates/perfetto-everywhere",
   "crates/perfetto-everywhere-core",
   "crates/perfetto-everywhere-native",
+  "crates/perfetto-everywhere-raw",
   "crates/perfetto-everywhere-web",
   "crates/perfetto-everywhere-collector",
   "crates/perfetto-everywhere-tracing",
@@ -25,6 +26,7 @@ categories = ["development-tools::debugging", "wasm"]
 [workspace.dependencies]
 perfetto-everywhere-core = { version = "0.1.0", path = "crates/perfetto-everywhere-core" }
 perfetto-everywhere-native = { version = "0.1.0", path = "crates/perfetto-everywhere-native" }
+perfetto-everywhere-raw = { version = "0.1.0", path = "crates/perfetto-everywhere-raw" }
 perfetto-everywhere-web = { version = "0.1.0", path = "crates/perfetto-everywhere-web" }
 perfetto-everywhere-collector = { version = "0.1.0", path = "crates/perfetto-everywhere-collector" }
 perfetto-everywhere-tracing = { version = "0.1.0", path = "crates/perfetto-everywhere-tracing" }

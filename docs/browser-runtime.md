@@ -11,7 +11,9 @@ the Web platform around the Rust/WASM API. `BrowserCaptureController` owns:
 - final collector request, errors, and application-owned trace bytes.
 
 Platform setup remains explicit while all instrumentation callsites stay in the
-shared Rust facade. A controller is single-use; construct another after finish
+shared Rust facade. `collectorWorkerUrl` and `collectorWorkerOptions` constructor
+options select application-packaged collector assets instead of the example
+filename. A controller is single-use; construct another after finish
 or abort to restart capture. Duplicate realms/metadata, invalid lifecycle calls,
 missing browser features, and collector errors are rejected rather than ignored.
 

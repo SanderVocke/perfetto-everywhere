@@ -24,4 +24,5 @@ perfetto-everywhere-tracing = { workspace = true, optional = true }
 perfetto-everywhere-native.workspace = true
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
+perfetto-everywhere-raw.workspace = true
 perfetto-everywhere-web.workspace = true
