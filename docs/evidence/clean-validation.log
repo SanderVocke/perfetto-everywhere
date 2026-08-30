@@ -1,0 +1,862 @@
+   Compiling unicode-ident v1.0.24
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+    Checking perfetto-everywhere-core v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-core)
+    Checking once_cell v1.21.4
+   Compiling find-msvc-tools v0.1.11
+   Compiling shlex v2.0.1
+    Checking cfg-if v1.0.4
+    Checking lazy_static v1.5.0
+    Checking log v0.4.34
+   Compiling thiserror v1.0.69
+    Checking nu-ansi-term v0.50.3
+    Checking smallvec v1.15.2
+    Checking pin-project-lite v0.2.17
+   Compiling paste v1.0.15
+   Compiling anyhow v1.0.104
+    Checking thread_local v1.1.10
+   Compiling either v1.18.0
+    Checking sharded-slab v0.1.7
+    Checking bitflags v2.13.1
+   Compiling libc v0.2.189
+   Compiling rustix v1.1.4
+   Compiling getrandom v0.4.3
+    Checking tracing-core v0.1.36
+   Compiling cc v1.4.4
+   Compiling prettyplease v0.2.37
+   Compiling equivalent v1.0.2
+   Compiling wasm-bindgen-shared v0.2.121
+   Compiling itertools v0.14.0
+   Compiling linux-raw-sys v0.12.1
+   Compiling hashbrown v0.17.1
+    Checking tracing-log v0.2.0
+   Compiling regex-syntax v0.8.11
+   Compiling bytes v1.12.1
+    Checking tracing-subscriber v0.3.23
+   Compiling fastrand v2.5.0
+   Compiling fixedbitset v0.5.7
+   Compiling heck v0.5.0
+   Compiling indexmap v2.14.1
+   Compiling rustversion v1.0.23
+   Compiling multimap v0.10.1
+    Checking perfetto-everywhere-web v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-web)
+   Compiling bumpalo v3.20.3
+   Compiling syn v2.0.119
+   Compiling perfetto-sdk-sys v1.3.0
+   Compiling petgraph v0.7.1
+   Compiling regex-automata v0.4.18
+   Compiling wasm-bindgen v0.2.121
+   Compiling tempfile v3.27.0
+   Compiling regex v1.13.1
+   Compiling wasm-bindgen-macro-support v0.2.121
+   Compiling tracing-attributes v0.1.31
+   Compiling thiserror-impl v1.0.69
+   Compiling prost-derive v0.14.4
+    Checking tracing v0.1.44
+    Checking perfetto-everywhere-tracing v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-tracing)
+   Compiling prost v0.14.1
+   Compiling prost-types v0.14.1
+   Compiling wasm-bindgen-macro v0.2.121
+   Compiling prost-build v0.14.1
+   Compiling tracing-perfetto-sdk-schema v0.13.1
+    Checking ordinary-browser-producer v0.1.0 (/tmp/perfetto-everywhere-final-audit/tests/browser/ordinary-producer)
+    Checking perfetto-everywhere-collector v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-collector)
+    Checking perfetto-sdk v1.1.1
+    Checking perfetto-everywhere-native v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-native)
+    Checking perfetto-everywhere v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere)
+    Checking native-capture-example v0.1.0 (/tmp/perfetto-everywhere-final-audit/examples/native-capture)
+    Checking tracing-bridge-example v0.1.0 (/tmp/perfetto-everywhere-final-audit/examples/tracing-bridge)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 19.64s
+   Compiling unicode-ident v1.0.24
+   Compiling once_cell v1.21.4
+   Compiling cfg-if v1.0.4
+   Compiling perfetto-everywhere-core v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-core)
+   Compiling log v0.4.34
+   Compiling lazy_static v1.5.0
+   Compiling nu-ansi-term v0.50.3
+   Compiling smallvec v1.15.2
+   Compiling bytes v1.12.1
+   Compiling pin-project-lite v0.2.17
+   Compiling bitflags v2.13.1
+   Compiling perfetto-sdk-sys v1.3.0
+   Compiling thread_local v1.1.10
+   Compiling getrandom v0.4.3
+   Compiling sharded-slab v0.1.7
+   Compiling proc-macro2 v1.0.107
+   Compiling wasm-bindgen-shared v0.2.121
+   Compiling tracing-core v0.1.36
+   Compiling tempfile v3.27.0
+   Compiling perfetto-everywhere-web v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-web)
+   Compiling quote v1.0.47
+   Compiling tracing-log v0.2.0
+   Compiling syn v2.0.119
+   Compiling tracing-subscriber v0.3.23
+   Compiling prettyplease v0.2.37
+   Compiling wasm-bindgen-macro-support v0.2.121
+   Compiling prost-derive v0.14.4
+   Compiling thiserror-impl v1.0.69
+   Compiling tracing-attributes v0.1.31
+   Compiling thiserror v1.0.69
+   Compiling perfetto-sdk v1.1.1
+   Compiling tracing v0.1.44
+   Compiling perfetto-everywhere-tracing v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-tracing)
+   Compiling prost v0.14.1
+   Compiling prost-types v0.14.1
+   Compiling perfetto-everywhere-native v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-native)
+   Compiling wasm-bindgen-macro v0.2.121
+   Compiling perfetto-everywhere v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere)
+   Compiling prost-build v0.14.1
+   Compiling native-capture-example v0.1.0 (/tmp/perfetto-everywhere-final-audit/examples/native-capture)
+   Compiling tracing-bridge-example v0.1.0 (/tmp/perfetto-everywhere-final-audit/examples/tracing-bridge)
+   Compiling wasm-bindgen v0.2.121
+   Compiling tracing-perfetto-sdk-schema v0.13.1
+   Compiling ordinary-browser-producer v0.1.0 (/tmp/perfetto-everywhere-final-audit/tests/browser/ordinary-producer)
+   Compiling perfetto-everywhere-collector v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-collector)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 20.96s
+     Running unittests src/main.rs (target/debug/deps/native_capture_example-1bef9b65b593e980)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/native-overhead.rs (target/debug/deps/native_overhead-ca84f5d666cd5546)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/ordinary_browser_producer-bfccc5d9bd326d15)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/perfetto_everywhere-75dac7eeb1764176)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/perfetto_everywhere_collector-ba1282eecadc59c8)
+
+running 6 tests
+test tests::rejects_partial_malformed_unknown_and_over_limit_input ... ok
+test tests::rejects_missing_or_nonmonotonic_clock_samples ... ok
+test tests::rejects_realm_metadata_collisions_and_unknown_metadata ... ok
+test tests::emits_parseable_trace_with_custom_clock_snapshot ... ok
+test tests::periodic_samples_remain_in_source_order ... ok
+test tests::repairs_and_reports_incomplete_span_boundaries ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/perfetto_everywhere_core-d7246f0a7c16e3df)
+
+running 7 tests
+test api::tests::flow_ids_are_nonzero_and_unique ... ok
+test api::tests::span_guard_closes_only_recorded_spans ... ok
+test metadata::tests::static_ids_are_deterministic_and_namespaced ... ok
+test metadata::tests::collision_validation_distinguishes_aliases_from_conflicts ... ok
+test protocol::tests::golden_layout_is_48_little_endian_bytes ... ok
+test protocol::tests::rejects_unknown_versions_kinds_flags_and_partial_bytes ... ok
+test protocol::tests::validates_complete_field_groups ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/perfetto_everywhere_native-b6f8f74d55fbc307)
+
+running 3 tests
+test tests::report_propagates_writer_failures ... ok
+test tests::config_has_bytes_and_clamps_tiny_buffers ... ok
+[863.938]    perfetto_c.cc:266631 Configured tracing session 1, #sources:1, duration:0 ms, #buffers:1, total buffer size:4096 KB, total sessions:1, uid:0 session name: ""
+test tests::capture_rejects_concurrent_sessions ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+[863.938]    perfetto_c.cc:268393 Tracing session 1 ended, total sessions:0
+     Running unittests src/lib.rs (target/debug/deps/perfetto_everywhere_tracing-c2a54ff9198c1fce)
+
+running 1 test
+test tests::maps_repeated_span_entries_and_typed_events ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/perfetto_everywhere_web-a99b0c149e2ce9ec)
+
+running 5 tests
+test audio::tests::header_and_records_are_aligned ... ok
+test audio::tests::reservation_is_bounded_and_wrap_safe ... ok
+test tests::bounded_double_batches_drop_without_growing ... ok
+test tests::filtering_and_shutdown_switch_are_explicit ... ok
+test tests::emits_typed_complete_groups_and_metadata ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/tracing_bridge_example-301cfe712b05e64d)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests perfetto_everywhere
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests perfetto_everywhere_collector
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests perfetto_everywhere_core
+
+running 1 test
+test crates/perfetto-everywhere-core/src/api.rs - api::SpanGuard (line 235) - compile fail ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+   Doc-tests perfetto_everywhere_native
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests perfetto_everywhere_tracing
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests perfetto_everywhere_web
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Checking perfetto-everywhere-core v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-core)
+ Documenting perfetto-everywhere-core v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-core)
+    Checking perfetto-everywhere-tracing v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-tracing)
+    Checking perfetto-everywhere-native v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-native)
+    Checking perfetto-everywhere-web v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-web)
+ Documenting perfetto-everywhere-native v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-native)
+ Documenting perfetto-everywhere-tracing v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-tracing)
+ Documenting perfetto-everywhere-web v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-web)
+ Documenting perfetto-everywhere-collector v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-collector)
+ Documenting ordinary-browser-producer v0.1.0 (/tmp/perfetto-everywhere-final-audit/tests/browser/ordinary-producer)
+    Checking perfetto-everywhere v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere)
+ Documenting perfetto-everywhere v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere)
+ Documenting tracing-bridge-example v0.1.0 (/tmp/perfetto-everywhere-final-audit/examples/tracing-bridge)
+ Documenting native-capture-example v0.1.0 (/tmp/perfetto-everywhere-final-audit/examples/native-capture)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.61s
+   Generated /tmp/perfetto-everywhere-final-audit/target/doc/native_capture_example/index.html and 9 other files
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.47
+   Compiling anyhow v1.0.104
+   Compiling once_cell v1.21.4
+   Compiling either v1.18.0
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.11
+   Compiling cfg-if v1.0.4
+   Compiling libc v0.2.189
+   Compiling wasm-bindgen-shared v0.2.121
+   Compiling perfetto-everywhere-core v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-core)
+   Compiling log v0.4.34
+   Compiling rustix v1.1.4
+   Compiling getrandom v0.4.3
+   Compiling thiserror v1.0.69
+   Compiling lazy_static v1.5.0
+   Compiling paste v1.0.15
+   Compiling sharded-slab v0.1.7
+   Compiling itertools v0.14.0
+   Compiling cc v1.4.4
+   Compiling tracing-core v0.1.36
+   Compiling thread_local v1.1.10
+   Compiling equivalent v1.0.2
+   Compiling bytes v1.12.1
+   Compiling linux-raw-sys v0.12.1
+   Compiling tracing-log v0.2.0
+   Compiling bitflags v2.13.1
+   Compiling hashbrown v0.17.1
+   Compiling regex-syntax v0.8.11
+   Compiling prettyplease v0.2.37
+   Compiling nu-ansi-term v0.50.3
+   Compiling smallvec v1.15.2
+   Compiling pin-project-lite v0.2.17
+   Compiling rustversion v1.0.23
+   Compiling tracing-subscriber v0.3.23
+   Compiling fixedbitset v0.5.7
+   Compiling fastrand v2.5.0
+   Compiling indexmap v2.14.1
+   Compiling syn v2.0.119
+   Compiling heck v0.5.0
+   Compiling multimap v0.10.1
+   Compiling bumpalo v3.20.3
+   Compiling perfetto-everywhere-web v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-web)
+   Compiling perfetto-sdk-sys v1.3.0
+   Compiling regex-automata v0.4.18
+   Compiling petgraph v0.7.1
+   Compiling wasm-bindgen v0.2.121
+   Compiling tempfile v3.27.0
+   Compiling regex v1.13.1
+   Compiling wasm-bindgen-macro-support v0.2.121
+   Compiling prost-derive v0.14.4
+   Compiling thiserror-impl v1.0.69
+   Compiling tracing-attributes v0.1.31
+   Compiling tracing v0.1.44
+   Compiling perfetto-everywhere-tracing v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-tracing)
+   Compiling prost v0.14.1
+   Compiling prost-types v0.14.1
+   Compiling wasm-bindgen-macro v0.2.121
+   Compiling prost-build v0.14.1
+   Compiling tracing-perfetto-sdk-schema v0.13.1
+   Compiling ordinary-browser-producer v0.1.0 (/tmp/perfetto-everywhere-final-audit/tests/browser/ordinary-producer)
+   Compiling perfetto-everywhere-collector v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-collector)
+   Compiling perfetto-sdk v1.1.1
+   Compiling perfetto-everywhere-native v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-native)
+   Compiling perfetto-everywhere v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere)
+   Compiling native-capture-example v0.1.0 (/tmp/perfetto-everywhere-final-audit/examples/native-capture)
+   Compiling tracing-bridge-example v0.1.0 (/tmp/perfetto-everywhere-final-audit/examples/tracing-bridge)
+    Finished `release` profile [optimized] target(s) in 49.85s
+   Compiling syn v2.0.119
+   Compiling thiserror-impl v1.0.69
+    Checking thiserror v1.0.69
+    Checking perfetto-sdk v1.1.1
+    Checking perfetto-everywhere-native v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-native)
+    Checking perfetto-everywhere v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.02s
+   Compiling syn v2.0.119
+   Compiling thiserror-impl v1.0.69
+   Compiling tracing-attributes v0.1.31
+    Checking tracing v0.1.44
+    Checking thiserror v1.0.69
+    Checking perfetto-sdk v1.1.1
+    Checking perfetto-everywhere-tracing v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-tracing)
+    Checking perfetto-everywhere-native v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-native)
+    Checking perfetto-everywhere v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.95s
+    Checking perfetto-everywhere v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.03s
+   Compiling wasm-bindgen-shared v0.2.121
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling rustversion v1.0.23
+   Compiling bumpalo v3.20.3
+    Checking unicode-ident v1.0.24
+    Checking cfg-if v1.0.4
+    Checking futures-task v0.3.34
+    Checking slab v0.4.12
+    Checking once_cell v1.21.4
+    Checking futures-core v0.3.34
+    Checking pin-project-lite v0.2.17
+    Checking perfetto-everywhere-core v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-core)
+    Checking futures-util v0.3.34
+   Compiling syn v2.0.119
+   Compiling wasm-bindgen v0.2.121
+   Compiling wasm-bindgen-macro-support v0.2.121
+   Compiling wasm-bindgen-macro v0.2.121
+    Checking js-sys v0.3.98
+    Checking perfetto-everywhere-web v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-web)
+    Checking perfetto-everywhere v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 9.58s
+    Checking once_cell v1.21.4
+    Checking log v0.4.34
+    Checking lazy_static v1.5.0
+   Compiling tracing-attributes v0.1.31
+    Checking nu-ansi-term v0.50.3
+    Checking thread_local v1.1.10
+    Checking smallvec v1.15.2
+    Checking sharded-slab v0.1.7
+    Checking tracing-core v0.1.36
+    Checking wasm-bindgen v0.2.121
+    Checking tracing-log v0.2.0
+    Checking tracing-subscriber v0.3.23
+    Checking js-sys v0.3.98
+    Checking tracing v0.1.44
+    Checking perfetto-everywhere-tracing v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-tracing)
+    Checking perfetto-everywhere-web v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-web)
+    Checking perfetto-everywhere v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.45s
+    Checking perfetto-everywhere v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.04s
+   Compiling once_cell v1.21.4
+   Compiling cfg-if v1.0.4
+   Compiling wasm-bindgen-shared v0.2.121
+   Compiling pin-project-lite v0.2.17
+   Compiling unicode-ident v1.0.24
+   Compiling futures-task v0.3.34
+   Compiling futures-core v0.3.34
+   Compiling slab v0.4.12
+   Compiling bytes v1.12.1
+   Compiling perfetto-everywhere-core v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-core)
+   Compiling log v0.4.34
+   Compiling lazy_static v1.5.0
+   Compiling nu-ansi-term v0.50.3
+   Compiling smallvec v1.15.2
+   Compiling wasm-bindgen v0.2.121
+   Compiling tracing-perfetto-sdk-schema v0.13.1
+   Compiling thread_local v1.1.10
+   Compiling sharded-slab v0.1.7
+   Compiling futures-util v0.3.34
+   Compiling tracing-core v0.1.36
+   Compiling tracing-log v0.2.0
+   Compiling tracing v0.1.44
+   Compiling prost v0.14.1
+   Compiling tracing-subscriber v0.3.23
+   Compiling prost-types v0.14.1
+   Compiling perfetto-everywhere-tracing v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-tracing)
+   Compiling js-sys v0.3.98
+   Compiling perfetto-everywhere-web v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-web)
+   Compiling perfetto-everywhere v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere)
+   Compiling perfetto-everywhere-collector v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-collector)
+    Finished `release` profile [optimized] target(s) in 22.51s
+license metadata present for 80 resolved packages
+expressions: (MIT OR Apache-2.0) AND Unicode-3.0, Apache-2.0, Apache-2.0 OR MIT, Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT, MIT, MIT OR Apache-2.0, MIT OR Apache-2.0 OR LGPL-2.1-or-later, Unlicense OR MIT
+    Fetching advisory database from `https://github.com/RustSec/advisory-db.git`
+      Loaded 1226 security advisories (from /tmp/perfetto-everywhere-final-audit/target/cargo-audit-home/advisory-db)
+    Updating crates.io index
+    Scanning Cargo.lock for vulnerabilities (80 crate dependencies)
+Crate:     paste
+Version:   1.0.15
+Warning:   unmaintained
+Title:     paste - no longer maintained
+Date:      2024-10-07
+ID:        RUSTSEC-2024-0436
+URL:       https://rustsec.org/advisories/RUSTSEC-2024-0436
+
+warning: 1 allowed warning found
+   Packaging perfetto-everywhere-core v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-core)
+    Packaged 9 files, 35.6KiB (10.4KiB compressed)
+   Packaging perfetto-everywhere-native v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-native)
+    Updating crates.io index
+    Packaged 6 files, 33.2KiB (10.3KiB compressed)
+   Packaging perfetto-everywhere-tracing v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-tracing)
+    Updating crates.io index
+    Packaged 6 files, 28.1KiB (9.0KiB compressed)
+   Packaging perfetto-everywhere-web v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-web)
+    Updating crates.io index
+    Packaged 7 files, 48.7KiB (12.8KiB compressed)
+   Packaging perfetto-everywhere v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere)
+    Updating crates.io index
+    Packaged 7 files, 24.6KiB (8.4KiB compressed)
+   Packaging perfetto-everywhere-collector v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-collector)
+    Updating crates.io index
+    Packaged 7 files, 68.2KiB (16.8KiB compressed)
+   Verifying perfetto-everywhere-core v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-core)
+   Compiling perfetto-everywhere-core v0.1.0 (/tmp/perfetto-everywhere-final-audit/target/package/perfetto-everywhere-core-0.1.0)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.72s
+   Verifying perfetto-everywhere-native v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-native)
+    Updating crates.io index
+   Unpacking perfetto-everywhere-core v0.1.0 (registry `/tmp/perfetto-everywhere-final-audit/target/package/tmp-registry`)
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.24
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.11
+   Compiling thiserror v1.0.69
+   Compiling paste v1.0.15
+   Compiling bitflags v2.13.1
+   Compiling perfetto-everywhere-core v0.1.0
+   Compiling cc v1.4.4
+   Compiling syn v2.0.119
+   Compiling perfetto-sdk-sys v1.3.0
+   Compiling thiserror-impl v1.0.69
+   Compiling perfetto-sdk v1.1.1
+   Compiling perfetto-everywhere-native v0.1.0 (/tmp/perfetto-everywhere-final-audit/target/package/perfetto-everywhere-native-0.1.0)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 18.91s
+   Verifying perfetto-everywhere-tracing v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-tracing)
+    Updating crates.io index
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.47
+   Compiling once_cell v1.21.4
+   Compiling cfg-if v1.0.4
+   Compiling log v0.4.34
+   Compiling lazy_static v1.5.0
+   Compiling smallvec v1.15.2
+   Compiling pin-project-lite v0.2.17
+   Compiling nu-ansi-term v0.50.3
+   Compiling perfetto-everywhere-core v0.1.0
+   Compiling thread_local v1.1.10
+   Compiling sharded-slab v0.1.7
+   Compiling tracing-core v0.1.36
+   Compiling tracing-log v0.2.0
+   Compiling tracing-subscriber v0.3.23
+   Compiling syn v2.0.119
+   Compiling tracing-attributes v0.1.31
+   Compiling tracing v0.1.44
+   Compiling perfetto-everywhere-tracing v0.1.0 (/tmp/perfetto-everywhere-final-audit/target/package/perfetto-everywhere-tracing-0.1.0)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 22.17s
+   Verifying perfetto-everywhere-web v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-web)
+    Updating crates.io index
+   Compiling perfetto-everywhere-core v0.1.0
+   Compiling perfetto-everywhere-web v0.1.0 (/tmp/perfetto-everywhere-final-audit/target/package/perfetto-everywhere-web-0.1.0)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 22.63s
+   Verifying perfetto-everywhere v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere)
+    Updating crates.io index
+   Unpacking perfetto-everywhere-native v0.1.0 (registry `/tmp/perfetto-everywhere-final-audit/target/package/tmp-registry`)
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.47
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.11
+   Compiling paste v1.0.15
+   Compiling thiserror v1.0.69
+   Compiling bitflags v2.13.1
+   Compiling perfetto-everywhere-core v0.1.0
+   Compiling cc v1.4.4
+   Compiling syn v2.0.119
+   Compiling perfetto-sdk-sys v1.3.0
+   Compiling thiserror-impl v1.0.69
+   Compiling perfetto-sdk v1.1.1
+   Compiling perfetto-everywhere-native v0.1.0
+   Compiling perfetto-everywhere v0.1.0 (/tmp/perfetto-everywhere-final-audit/target/package/perfetto-everywhere-0.1.0)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 40.71s
+   Verifying perfetto-everywhere-collector v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-collector)
+    Updating crates.io index
+   Unpacking perfetto-everywhere-web v0.1.0 (registry `/tmp/perfetto-everywhere-final-audit/target/package/tmp-registry`)
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.47
+   Compiling anyhow v1.0.104
+   Compiling either v1.18.0
+   Compiling bytes v1.12.1
+   Compiling libc v0.2.189
+   Compiling rustix v1.1.4
+   Compiling getrandom v0.4.3
+   Compiling hashbrown v0.17.1
+   Compiling prettyplease v0.2.37
+   Compiling cfg-if v1.0.4
+   Compiling bitflags v2.13.1
+   Compiling linux-raw-sys v0.12.1
+   Compiling regex-syntax v0.8.11
+   Compiling equivalent v1.0.2
+   Compiling fixedbitset v0.5.7
+   Compiling fastrand v2.5.0
+   Compiling once_cell v1.21.4
+   Compiling multimap v0.10.1
+   Compiling itertools v0.14.0
+   Compiling heck v0.5.0
+   Compiling log v0.4.34
+   Compiling perfetto-everywhere-core v0.1.0
+   Compiling indexmap v2.14.1
+   Compiling perfetto-everywhere-web v0.1.0
+   Compiling petgraph v0.7.1
+   Compiling regex-automata v0.4.18
+   Compiling syn v2.0.119
+   Compiling tempfile v3.27.0
+   Compiling regex v1.13.1
+   Compiling prost-derive v0.14.4
+   Compiling prost v0.14.1
+   Compiling prost-types v0.14.1
+   Compiling prost-build v0.14.1
+   Compiling tracing-perfetto-sdk-schema v0.13.1
+   Compiling perfetto-everywhere-collector v0.1.0 (/tmp/perfetto-everywhere-final-audit/target/package/perfetto-everywhere-collector-0.1.0)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1m 00s
+   Compiling syn v2.0.119
+   Compiling thiserror-impl v1.0.69
+   Compiling thiserror v1.0.69
+   Compiling perfetto-sdk v1.1.1
+   Compiling perfetto-everywhere-native v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-native)
+   Compiling perfetto-everywhere v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere)
+   Compiling native-capture-example v0.1.0 (/tmp/perfetto-everywhere-final-audit/examples/native-capture)
+    Finished `release` profile [optimized] target(s) in 2.68s
+     Running `target/release/native-capture-example artifacts`
+[025.516]    perfetto_c.cc:266631 Configured tracing session 1, #sources:1, duration:0 ms, #buffers:1, total buffer size:1024 KB, total sessions:1, uid:0 session name: ""
+[025.518]    perfetto_c.cc:268393 Tracing session 1 ended, total sessions:0
+wrote artifacts/native-first.pftrace (2420 bytes, buffer=1024 KiB, flush=35.106µs, stop=21.671µs, read=97.543µs)
+[025.518]    perfetto_c.cc:266631 Configured tracing session 2, #sources:1, duration:0 ms, #buffers:1, total buffer size:256 KB, total sessions:1, uid:0 session name: ""
+[025.519]    perfetto_c.cc:268393 Tracing session 2 ended, total sessions:0
+wrote artifacts/native-second.pftrace (2418 bytes, buffer=256 KiB, flush=16.862µs, stop=15.669µs, read=74.711µs)
+[025.519]    perfetto_c.cc:266631 Configured tracing session 3, #sources:1, duration:0 ms, #buffers:1, total buffer size:8 KB, total sessions:1, uid:0 session name: ""
+[025.539]    perfetto_c.cc:268393 Tracing session 3 ended, total sessions:0
+wrote overflow trace artifacts/native-overflow.pftrace (7647 bytes)
+#=#=#                                                                                                                                                     0.6%####                                                                       6.2%#########                                                                 13.3%#############                                                             18.9%##################                                                        25.2%######################                                                    31.7%############################                                              39.1%#################################                                         47.1%#######################################                                   55.0%#############################################                             63.8%###################################################                       71.8%##########################################################                80.7%################################################################          89.8%#######################################################################   99.1%######################################################################## 100.0%
+Loading trace: 0.00 MBLoading trace: 0.00 MB[027.337]     common_flags.cc:525 Trace loaded: 0.00 MB in 0.02s (0.1 MB/s)
+[027.337]            query.cc:191 Query execution time: 0 ms
+"name","count"
+"cache miss",1
+"compile graph",1
+"graph ready",1
+"nested work",1
+"queue pressure",1
+"worker task",1
+
+"name","samples","minimum","maximum","average"
+"cpu_load [track 2]",2,0.250000,0.910000,0.580000
+"queue_depth [track 1]",2,2.000000,9.000000,5.500000
+
+"key","display_value"
+"debug.category","application"
+"debug.details","dynamic native field"
+"debug.enabled","true"
+"debug.nodes","123"
+"debug.phase","statically interned"
+"debug.ratio","0.625"
+"debug.revision","-7"
+
+"flow_count"
+1
+
+"filtered_events"
+0
+
+"serious_import_errors"
+0
+Loading trace: 0.00 MBLoading trace: 0.01 MB[027.425]     common_flags.cc:525 Trace loaded: 0.01 MB in 0.02s (0.4 MB/s)
+
+
+Trace health issues:
+
+  Data losses
+    traced_buf_incremental_sequences_dropped[0]: 1 | For a given buffer, indicates the number of sequences where all the packets on that sequence were dropped due to lack of a valid incremental state (i.e. interned data). This is usually a strong sign that either: 1) incremental state invalidation is disabled. 2) the incremental state invalidation interval is too low. In either case, see https://perfetto.dev/docs/concepts/buffers#incremental-state-in-trace-packets
+    traced_buf_patches_failed[0]: 25 | The tracing service potentially lost data from one of the data sources writing into the given target_buffer. This entry can be ignored if you're using DISCARD buffers and traced_buf_chunks_discarded is nonzero, meaning that the buffer was filled.
+
+[027.425]            query.cc:191 Query execution time: 0 ms
+"name","value","severity"
+"traced_buf_bytes_overwritten",1941504,"info"
+"traced_buf_chunks_overwritten",474,"info"
+"traced_buf_incremental_sequences_dropped",1,"data_loss"
+"traced_buf_write_wrap_count",238,"info"
+Loading trace: 0.00 MBLoading trace: 0.00 MB[027.502]     common_flags.cc:525 Trace loaded: 0.00 MB in 0.02s (0.1 MB/s)
+[027.502]            query.cc:191 Query execution time: 0 ms
+native acceptance validation passed
+   Compiling syn v2.0.119
+   Compiling thiserror-impl v1.0.69
+   Compiling tracing-attributes v0.1.31
+   Compiling thiserror v1.0.69
+   Compiling tracing v0.1.44
+   Compiling perfetto-sdk v1.1.1
+   Compiling perfetto-everywhere-tracing v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-tracing)
+   Compiling perfetto-everywhere-native v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-native)
+   Compiling perfetto-everywhere v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere)
+   Compiling tracing-bridge-example v0.1.0 (/tmp/perfetto-everywhere-final-audit/examples/tracing-bridge)
+    Finished `release` profile [optimized] target(s) in 3.72s
+     Running `target/release/tracing-bridge-example artifacts/tracing-bridge.pftrace`
+[031.250]    perfetto_c.cc:266631 Configured tracing session 1, #sources:1, duration:0 ms, #buffers:1, total buffer size:4096 KB, total sessions:1, uid:0 session name: ""
+wrote artifacts/tracing-bridge.pftrace (1796 bytes)
+[031.251]    perfetto_c.cc:268393 Tracing session 1 ended, total sessions:0
+Loading trace: 0.00 MBLoading trace: 0.00 MB[031.308]     common_flags.cc:525 Trace loaded: 0.00 MB in 0.02s (0.1 MB/s)
+[031.309]            query.cc:191 Query execution time: 0 ms
+"name","count"
+"compile graph through tracing",2
+"event examples/tracing-bridge/src/main.rs:32",1
+"event examples/tracing-bridge/src/main.rs:34",1
+
+"name","key","display_value"
+"compile graph through tracing","debug.category","graph"
+"compile graph through tracing","debug.category","graph"
+"compile graph through tracing","debug.load","0.625"
+"compile graph through tracing","debug.load","0.625"
+"compile graph through tracing","debug.nodes","123"
+"compile graph through tracing","debug.nodes","123"
+"compile graph through tracing","debug.phase","prepare"
+"compile graph through tracing","debug.phase","prepare"
+"compile graph through tracing","debug.success","true"
+"compile graph through tracing","debug.success","true"
+"compile graph through tracing","debug.tracing_level","INFO"
+"compile graph through tracing","debug.tracing_level","INFO"
+"compile graph through tracing","debug.tracing_target","graph"
+"compile graph through tracing","debug.tracing_target","graph"
+"event examples/tracing-bridge/src/main.rs:32","debug.message","starting compile"
+"event examples/tracing-bridge/src/main.rs:32","debug.revision","-7"
+"event examples/tracing-bridge/src/main.rs:32","debug.severity","3"
+"event examples/tracing-bridge/src/main.rs:32","debug.target","graph"
+"event examples/tracing-bridge/src/main.rs:32","debug.tracing_level","INFO"
+"event examples/tracing-bridge/src/main.rs:34","debug.message","queue pressure"
+"event examples/tracing-bridge/src/main.rs:34","debug.queue_depth","9"
+"event examples/tracing-bridge/src/main.rs:34","debug.recoverable","true"
+"event examples/tracing-bridge/src/main.rs:34","debug.severity","4"
+"event examples/tracing-bridge/src/main.rs:34","debug.target","audio"
+"event examples/tracing-bridge/src/main.rs:34","debug.tracing_level","WARN"
+
+"serious_import_errors"
+0
+tracing compatibility validation passed
+   Compiling native-capture-example v0.1.0 (/tmp/perfetto-everywhere-final-audit/examples/native-capture)
+    Finished `release` profile [optimized] target(s) in 0.32s
+run mode=disabled repetition=1
+run mode=inactive repetition=1
+run mode=active repetition=1
+[031.687]    perfetto_c.cc:266631 Configured tracing session 1, #sources:1, duration:0 ms, #buffers:1, total buffer size:16384 KB, total sessions:1, uid:0 session name: ""
+[031.692]    perfetto_c.cc:268393 Tracing session 1 ended, total sessions:0
+# Native overhead sanity check
+
+Three release-mode processes per mode; each executes the same arithmetic loop. `inactive` calls the facade without a capture and `active` records one instant per iteration. Initialization and trace readout are outside `elapsed_ns`; process CPU/RSS include them. This is a regression sanity check, not an AudioWorklet or hardware-independent claim.
+
+| Mode | Median workload ms | Iterations/s | Trace bytes | User s | System s | Peak RSS KiB |
+|---|---:|---:|---:|---:|---:|---:|
+| disabled | 0.007 | 1528584531 | 0 | 0.000 | 0.000 | 5488 |
+| inactive | 0.025 | 401010547 | 0 | 0.000 | 0.000 | 5488 |
+| active | 2.745 | 3643423 | 371367 | 0.000 | 0.000 | 6640 |
+
+   Compiling syn v2.0.119
+   Compiling prettyplease v0.2.37
+   Compiling prost-derive v0.14.4
+   Compiling prost v0.14.1
+   Compiling prost-types v0.14.1
+   Compiling prost-build v0.14.1
+   Compiling tracing-perfetto-sdk-schema v0.13.1
+   Compiling perfetto-everywhere-collector v0.1.0 (/tmp/perfetto-everywhere-final-audit/crates/perfetto-everywhere-collector)
+    Finished `release` profile [optimized] target(s) in 28.84s
+     Running `target/release/examples/clock-snapshot artifacts/collector-clock.pftrace`
+wrote artifacts/collector-clock.pftrace (1721 bytes)
+Loading trace: 0.00 MBLoading trace: 0.00 MB[060.628]     common_flags.cc:525 Trace loaded: 0.00 MB in 0.02s (0.1 MB/s)
+[060.628]            query.cc:191 Query execution time: 0 ms
+"clock_id","samples","minimum","maximum"
+6,4,1000000000,1000002499
+64,4,1000,4000
+
+"name","count","first_ts","last_ts","minimum_duration","maximum_duration"
+"clock calibration",4,1000000000,1000002499,0,0
+"clocked event",2,1000000600,1000001099,0,0
+"clocked task",2,1000000500,1000000999,2000,2000
+
+"name","samples","minimum","maximum"
+"page/clocked counter",1,0.100000,0.100000
+"worker/clocked counter",1,0.200000,0.200000
+
+"flow_count"
+1
+
+"clock_sync_errors"
+0
+
+"negative_slices"
+0
+collector and clock-snapshot validation passed
+   Compiling ordinary-browser-producer v0.1.0 (/tmp/perfetto-everywhere-final-audit/tests/browser/ordinary-producer)
+    Finished `release` profile [optimized] target(s) in 0.30s
+{"realms":[{"realm":1,"bytes":384,"records":8},{"realm":2,"bytes":384,"records":8},{"realm":3,"bytes":384,"records":8}],"calibrations":[{"realm":2,"sourceMs":9.444999992847443,"referenceMs":1788054704846.7,"offsetMs":0.059814453125,"uncertaintyMs":0.1099853515625},{"realm":2,"sourceMs":9.519999995827675,"referenceMs":1788054704846.775,"offsetMs":0,"uncertaintyMs":0.0150146484375},{"realm":2,"sourceMs":9.53999999165535,"referenceMs":1788054704846.795,"offsetMs":-0.0078125,"uncertaintyMs":0.0074462890625},{"realm":2,"sourceMs":9.554999992251396,"referenceMs":1788054704846.8098,"offsetMs":-0.0078125,"uncertaintyMs":0.007568359375},{"realm":2,"sourceMs":9.574999988079071,"referenceMs":1788054704846.8298,"offsetMs":-0.0078125,"uncertaintyMs":0.012451171875},{"realm":3,"sourceMs":9.390000000596046,"referenceMs":1788054704847,"offsetMs":0.04736328125,"uncertaintyMs":0.0875244140625},{"realm":3,"sourceMs":9.445000007748604,"referenceMs":1788054704847.0552,"offsetMs":-0.00244140625,"uncertaintyMs":0.012451171875},{"realm":3,"sourceMs":9.469999998807907,"referenceMs":1788054704847.08,"offsetMs":-0.00244140625,"uncertaintyMs":0.0125732421875},{"realm":3,"sourceMs":9.490000009536743,"referenceMs":1788054704847.1,"offsetMs":-0.007568359375,"uncertaintyMs":0.012451171875},{"realm":3,"sourceMs":9.515000000596046,"referenceMs":1788054704847.125,"offsetMs":-0.027587890625,"uncertaintyMs":0.032470703125}],"adapterRecords":9}
+    Finished `release` profile [optimized] target(s) in 0.02s
+{"requestedDurationMs":3000,"baselineCallbacks":1120,"baselineDiscontinuities":0,"callbacks":1168,"records":4673,"expectedRecords":4673,"dropped":0,"discontinuities":0,"highWater":177,"drains":754,"calibrations":8,"benchmarkP99Ms":0.005000010132789612,"quantumBudgetMs":2.6666666666666665,"forcedDropped":4,"malformedRejected":true,"traceBytes":347808}
+Loading trace: 0.00 MBLoading trace: 0.35 MB[068.593]     common_flags.cc:525 Trace loaded: 0.35 MB in 0.03s (12.0 MB/s)
+[068.593]            query.cc:191 Query execution time: 0 ms
+"clock_id","samples"
+6,8
+64,8
+
+"name","count","minimum_duration","maximum_duration"
+"audio graph installed",1,0,0
+"audio process quantum",1168,2666666,2666667
+"clock calibration",8,0,0
+"trace producer health",1,0,0
+
+"name","samples","minimum","maximum"
+"AudioWorklet/audio cpu load",1168,0.200000,0.290000
+"AudioWorklet/audio queue depth",1168,0.000000,15.000000
+
+"key","display_value"
+"debug.completed_batches","754"
+"debug.dropped_records","0"
+"debug.emitted_records","4673"
+"debug.high_water_records","177"
+"debug.repaired_span_boundaries","0"
+
+"clock_sync_errors"
+0
+
+"negative_slices"
+0
+AudioWorklet transport and clock validation passed
+    Finished `release` profile [optimized] target(s) in 0.03s
+{"bytes":238831,"ordinaryRecords":24,"audioCallbacks":792,"audioRecords":3169,"expectedAudioRecords":3169,"dropped":0,"discontinuities":1,"calibrations":12,"restartVerified":true}
+Loading trace: 0.00 MBLoading trace: 0.24 MB[071.634]     common_flags.cc:525 Trace loaded: 0.24 MB in 0.02s (10.5 MB/s)
+[071.634]            query.cc:191 Query execution time: 0 ms
+"name","type"
+"AudioWorklet","global_merged_track_event"
+"AudioWorklet/audio cpu load","global_counter_track_event"
+"AudioWorklet/audio queue depth","global_counter_track_event"
+"Window","global_merged_track_event"
+"Window/track 1","global_merged_track_event"
+"Window/worker counter","global_counter_track_event"
+"Worker A","global_merged_track_event"
+"Worker A/track 1","global_merged_track_event"
+"Worker A/worker counter","global_counter_track_event"
+"Worker B","global_merged_track_event"
+"Worker B/track 1","global_merged_track_event"
+"Worker B/worker counter","global_counter_track_event"
+
+"name","count","first_ts","last_ts","minimum_duration","maximum_duration"
+"audio graph installed",1,1086533943,1086533943,0,0
+"audio process quantum",792,1086533943,3206533943,2666666,2666667
+"clock calibration",12,1000000000,3171263109,0,0
+"compile graph",1,1012914928,1012914928,95000,95000
+"heartbeat",3,1002030000,1012969928,0,0
+"ordinary task",1,1012814912,1012814912,60000,60000
+"request graph rebuild",1,1001645000,1001645000,440000,440000
+"trace producer health",4,1013145000,3171263109,0,0
+"worker ready",3,1002060000,1012994928,0,0
+
+"name","samples","minimum","maximum"
+"AudioWorklet/audio cpu load",792,0.200000,0.290000
+"AudioWorklet/audio queue depth",792,0.000000,15.000000
+"Window/worker counter",1,1.000000,1.000000
+"Worker A/worker counter",1,2.000000,2.000000
+"Worker B/worker counter",1,3.000000,3.000000
+
+"outgoing","incoming"
+"request graph rebuild","compile graph"
+"compile graph","audio graph installed"
+
+"clock_id","samples"
+6,12
+64,12
+
+"key","display_value"
+"debug.category","browser-test"
+"debug.realm","1"
+"debug.source_frame_or_tick","151770000"
+
+"key","display_value"
+"debug.realm","1"
+"debug.realm","2"
+"debug.realm","3"
+"debug.severity","3"
+"debug.source_frame_or_tick","151745000"
+"debug.source_frame_or_tick","28130000"
+"debug.source_frame_or_tick","31250000"
+"debug.target","ordinary producer"
+
+"duplicate_track_ids"
+0
+
+"negative_slices"
+0
+
+"serious_import_errors"
+0
+complete browser multirealm validation passed
+    Finished `release` profile [optimized] target(s) in 0.02s
+{"requestedDurationMs":60000,"baselineCallbacks":22500,"baselineDiscontinuities":0,"callbacks":22536,"records":90145,"expectedRecords":90145,"dropped":0,"discontinuities":0,"highWater":145,"drains":15004,"calibrations":122,"benchmarkP99Ms":0.009999990463256836,"quantumBudgetMs":2.6666666666666665,"forcedDropped":4,"malformedRejected":true,"traceBytes":6876493}
+Loading trace: 0.00 MBLoading trace: 6.88 MB[215.565]     common_flags.cc:525 Trace loaded: 6.88 MB in 0.10s (67.9 MB/s)
+[215.569]            query.cc:191 Query execution time: 4 ms
+"clock_id","samples"
+6,122
+64,122
+
+"name","count","minimum_duration","maximum_duration"
+"audio graph installed",1,0,0
+"audio process quantum",22536,2666666,2666667
+"clock calibration",122,0,0
+"trace producer health",1,0,0
+
+"name","samples","minimum","maximum"
+"AudioWorklet/audio cpu load",22536,0.200000,0.290000
+"AudioWorklet/audio queue depth",22536,0.000000,15.000000
+
+"key","display_value"
+"debug.completed_batches","15004"
+"debug.dropped_records","0"
+"debug.emitted_records","90145"
+"debug.high_water_records","145"
+"debug.repaired_span_boundaries","0"
+
+"clock_sync_errors"
+0
+
+"negative_slices"
+0
+AudioWorklet transport and clock validation passed
+complete perfetto-everywhere release validation passed

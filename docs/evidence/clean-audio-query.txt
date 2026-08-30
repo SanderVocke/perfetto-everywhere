@@ -1,0 +1,26 @@
+"clock_id","samples"
+6,122
+64,122
+
+"name","count","minimum_duration","maximum_duration"
+"audio graph installed",1,0,0
+"audio process quantum",22536,2666666,2666667
+"clock calibration",122,0,0
+"trace producer health",1,0,0
+
+"name","samples","minimum","maximum"
+"AudioWorklet/audio cpu load",22536,0.200000,0.290000
+"AudioWorklet/audio queue depth",22536,0.000000,15.000000
+
+"key","display_value"
+"debug.completed_batches","15004"
+"debug.dropped_records","0"
+"debug.emitted_records","90145"
+"debug.high_water_records","145"
+"debug.repaired_span_boundaries","0"
+
+"clock_sync_errors"
+0
+
+"negative_slices"
+0

@@ -1,0 +1,18 @@
+{
+  "requestedDurationMs": 60000,
+  "baselineCallbacks": 22500,
+  "baselineDiscontinuities": 0,
+  "callbacks": 22536,
+  "records": 90145,
+  "expectedRecords": 90145,
+  "dropped": 0,
+  "discontinuities": 0,
+  "highWater": 145,
+  "drains": 15004,
+  "calibrations": 122,
+  "benchmarkP99Ms": 0.009999990463256836,
+  "quantumBudgetMs": 2.6666666666666665,
+  "forcedDropped": 4,
+  "malformedRejected": true,
+  "traceBytes": 6876493
+}
