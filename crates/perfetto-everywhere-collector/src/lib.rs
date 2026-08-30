@@ -227,21 +227,11 @@ impl Collector {
 
     pub fn finish(mut self) -> Result<Vec<u8>, CollectorError> {
         self.validate_references()?;
-        self.groups.sort_by_key(|group| {
-            (
-                group.header.realm_id,
-                group.header.timestamp,
-                record_order(group.header.kind),
-            )
-        });
+        self.groups
+            .sort_by_key(|group| (group.header.realm_id, group.header.timestamp));
         self.repair_span_boundaries();
-        self.groups.sort_by_key(|group| {
-            (
-                group.header.realm_id,
-                group.header.timestamp,
-                record_order(group.header.kind),
-            )
-        });
+        self.groups
+            .sort_by_key(|group| (group.header.realm_id, group.header.timestamp));
 
         let mut packets = Vec::new();
         self.emit_clock_snapshots(&mut packets)?;
@@ -771,14 +761,6 @@ fn fit_clock_samples(
         .collect()
 }
 
-const fn record_order(kind: RecordKind) -> u8 {
-    match kind {
-        RecordKind::SpanEnd => 0,
-        RecordKind::SpanBegin => 1,
-        _ => 2,
-    }
-}
-
 fn ticks_to_ns(ticks: u64, ticks_per_second: u64) -> u64 {
     ((u128::from(ticks) * 1_000_000_000_u128) / u128::from(ticks_per_second))
         .min(u128::from(u64::MAX)) as u64
@@ -1105,6 +1087,51 @@ mod tests {
                     && annotation.value == Some(debug_annotation::Value::UintValue(1))
             })
         }));
+    }
+
+    #[test]
+    fn equal_timestamp_nested_spans_preserve_producer_order() {
+        let mut collector = configured();
+        let mut records = Vec::new();
+        for kind in [
+            RecordKind::SpanBegin,
+            RecordKind::SpanBegin,
+            RecordKind::SpanEnd,
+            RecordKind::SpanEnd,
+        ] {
+            let mut event = record(1, 1_100);
+            event.kind = kind;
+            records.extend_from_slice(&event.encode());
+        }
+        collector.ingest_batch(&records).unwrap();
+        let bytes = collector.finish().unwrap();
+        let trace = Trace::decode(bytes.as_slice()).unwrap();
+        let types: Vec<i32> = trace
+            .packet
+            .iter()
+            .filter_map(|packet| match &packet.data {
+                Some(trace_packet::Data::TrackEvent(event))
+                    if matches!(
+                        event.r#type,
+                        Some(value)
+                            if value == track_event::Type::SliceBegin as i32
+                                || value == track_event::Type::SliceEnd as i32
+                    ) =>
+                {
+                    event.r#type
+                }
+                _ => None,
+            })
+            .collect();
+        assert_eq!(
+            types,
+            vec![
+                track_event::Type::SliceBegin as i32,
+                track_event::Type::SliceBegin as i32,
+                track_event::Type::SliceEnd as i32,
+                track_event::Type::SliceEnd as i32,
+            ]
+        );
     }
 
     #[test]
