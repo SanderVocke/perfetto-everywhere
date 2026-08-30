@@ -1,4 +1,4 @@
-#![doc = include_str!("../../../README.md")]
+#![doc = "Unified Perfetto tracing for native Rust, browser Workers, and AudioWorklets.\n\nSee the repository README for complete native, browser, AudioWorklet, and `tracing` quick starts."]
 #![forbid(unsafe_code)]
 
 pub use perfetto_everywhere_core::*;
