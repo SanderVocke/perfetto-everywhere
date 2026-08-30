@@ -54,6 +54,17 @@ jobs:
           REPETITIONS: "1"
         run: scripts/benchmark-native.sh artifacts
 
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install WASM target and matching bindgen CLI
+        run: |
+          rustup target add wasm32-unknown-unknown
+          cargo install wasm-bindgen-cli --version 0.2.121 --locked
+      - name: Ordinary page and Worker browser acceptance
+        run: scripts/run-ordinary-browser.sh artifacts
+
   wasm:
     runs-on: ubuntu-latest
     steps:

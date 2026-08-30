@@ -1,0 +1,75 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>ordinary browser producer test</title>
+<pre id="status">starting</pre><pre id="summary"></pre><pre id="error"></pre>
+<script type="module">
+import init, { produce } from "./pkg/ordinary/ordinary_browser_producer.js";
+const RECORD_SIZE = 48;
+const wait = (worker, type) => new Promise(resolve => {
+  const listener = event => {
+    if (event.data.type !== type) return;
+    worker.removeEventListener("message", listener);
+    resolve(event.data);
+  };
+  worker.addEventListener("message", listener);
+});
+function inspect(realm, bytes) {
+  if (bytes.length % RECORD_SIZE) throw new Error(`partial batch for realm ${realm}`);
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const records = bytes.length / RECORD_SIZE;
+  for (let index = 0; index < records; index++) {
+    const offset = index * RECORD_SIZE;
+    if (view.getUint8(offset) !== 1) throw new Error("wrong protocol version");
+    if (view.getUint32(offset + 4, true) !== realm) throw new Error("realm collision");
+    if (view.getUint32(offset + 12, true) !== realm + 100) throw new Error("clock collision");
+  }
+  const expectedFlow = realm === 3 ? 0n : 42n;
+  if (view.getBigUint64(32, true) !== expectedFlow) throw new Error("flow propagation failed");
+  return records;
+}
+async function main() {
+  if (!crossOriginIsolated || typeof SharedArrayBuffer !== "function") {
+    throw new Error("cross-origin isolation unavailable");
+  }
+  await init();
+  const workers = [2, 3].map(realm => new Worker(`ordinary-worker.js?realm=${realm}`, {type: "module"}));
+  await Promise.all(workers.map(worker => wait(worker, "ready")));
+  const calibrations = [];
+  for (const [index, worker] of workers.entries()) {
+    for (let sample = 0; sample < 5; sample++) {
+      const sentMs = performance.timeOrigin + performance.now();
+      const pendingPong = wait(worker, "clock-pong");
+      worker.postMessage({type: "clock-ping", id: sample});
+      const pong = await pendingPong;
+      const receivedMs = performance.timeOrigin + performance.now();
+      calibrations.push({
+        realm: index + 2,
+        sourceMs: pong.localMs,
+        referenceMs: pong.referenceMs,
+        offsetMs: pong.referenceMs - (sentMs + receivedMs) / 2,
+        uncertaintyMs: (receivedMs - sentMs) / 2,
+      });
+    }
+  }
+  workers.forEach(worker => worker.postMessage({type: "unknown-control-message"}));
+  const pending = workers.map(worker => wait(worker, "records"));
+  workers[0].postMessage({type: "produce", flow: 42n});
+  workers[1].postMessage({type: "produce", flow: 0n});
+  const page = produce(1, 42n);
+  const results = [{realm: 1, records: page}, ...(await Promise.all(pending))];
+  const summary = results.map(result => ({
+    realm: result.realm,
+    bytes: result.records.length,
+    records: inspect(result.realm, result.records),
+  }));
+  for (const worker of workers) worker.terminate();
+  document.getElementById("summary").textContent = JSON.stringify({realms: summary, calibrations});
+  document.getElementById("status").textContent = "done";
+  document.title = "DONE ordinary browser producer test";
+}
+main().catch(error => {
+  document.getElementById("error").textContent = error.stack || String(error);
+  document.getElementById("status").textContent = "failed";
+  document.title = "FAILED ordinary browser producer test";
+});
+</script>

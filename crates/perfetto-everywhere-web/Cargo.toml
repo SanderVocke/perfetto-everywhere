@@ -13,3 +13,7 @@ categories.workspace = true
 
 [dependencies]
 perfetto-everywhere-core.workspace = true
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+js-sys = "=0.3.98"
+wasm-bindgen = "=0.2.121"
