@@ -155,7 +155,16 @@ async function main() {
   }
   calibrate();
   const calibrationTimer = setInterval(calibrate, 500);
-  const drainTimer = setInterval(() => collector.postMessage({type: "drain"}), 2);
+  let lastDiscontinuities = 0;
+  const drainTimer = setInterval(() => {
+    collector.postMessage({type: "drain"});
+    const discontinuities = Atomics.load(ring.header, 7) >>> 0;
+    if (discontinuities !== lastDiscontinuities) {
+      lastDiscontinuities = discontinuities;
+      calibrate();
+    }
+  }, 2);
+  navigator.mediaDevices?.addEventListener("devicechange", calibrate);
   await new Promise(resolve => setTimeout(resolve, durationMs));
   clearInterval(calibrationTimer);
   calibrate();
@@ -164,6 +173,7 @@ async function main() {
   node.port.postMessage({type: "stop"});
   await stopped;
   clearInterval(drainTimer);
+  navigator.mediaDevices?.removeEventListener("devicechange", calibrate);
   collector.postMessage({
     type: "finish", sampleRate: SAMPLE_RATE, metadata: metadata(), calibrations,
   });

@@ -14,6 +14,13 @@ AUDIO_DURATION_MS=60000 nix develop --command scripts/run-audio-browser.sh artif
 AUDIO_REQUIRE_FULL=1 nix develop --command scripts/validate-audio.sh artifacts
 ```
 
+GitHub Actions full acceptance run
+<https://github.com/SanderVocke/perfetto-everywhere/actions/runs/33284532144>
+completed successfully at commit `db36be3812fa06fb3eab61374f7ccb4fc0d6ee1d` and
+retained the trace, SQL, and raw JSON artifact. It observed 22,509 baseline
+callbacks/one discontinuity and 22,543 traced callbacks/zero discontinuities,
+90,173 records, zero drops, 181-record high-water occupancy, and 0.025 ms p99.
+
 The accepted local full run observed 22,496 baseline callbacks with one
 scheduler discontinuity and 22,536 traced callbacks with zero discontinuities.
 The traced run emitted 90,145 records (four per quantum plus one flow event),
