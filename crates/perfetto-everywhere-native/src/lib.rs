@@ -23,6 +23,7 @@ use perfetto_sdk::{
     track_event_categories, track_event_counter, track_event_end,
 };
 use std::{
+    cell::RefCell,
     collections::{BTreeMap, BTreeSet},
     error::Error,
     ffi::CString,
@@ -47,6 +48,11 @@ static INITIALIZED: OnceLock<Result<(), String>> = OnceLock::new();
 static CAPTURE_ACTIVE: AtomicBool = AtomicBool::new(false);
 static CATEGORY_FILTER: OnceLock<RwLock<Option<BTreeSet<u32>>>> = OnceLock::new();
 static TRACKS: OnceLock<Mutex<TrackRegistry>> = OnceLock::new();
+
+thread_local! {
+    static EVENT_NAMES: RefCell<BTreeMap<(u32, &'static str), CString>> =
+        const { RefCell::new(BTreeMap::new()) };
+}
 
 #[derive(Default)]
 struct TrackRegistry {
@@ -411,6 +417,16 @@ fn add_common(
     }
 }
 
+fn with_event_name<R>(name: StaticName, operation: impl FnOnce(&CString) -> R) -> R {
+    EVENT_NAMES.with(|names| {
+        let mut names = names.borrow_mut();
+        let name = names.entry((name.id.0, name.label)).or_insert_with(|| {
+            CString::new(name.label).unwrap_or_else(|_| CString::new("invalid name").unwrap())
+        });
+        operation(name)
+    })
+}
+
 fn emit_named(
     event_type: fn(*const std::os::raw::c_char) -> TrackEventType,
     category: Category,
@@ -419,12 +435,13 @@ fn emit_named(
     fields: &[Field<'_>],
     flow: FlowAttachment,
 ) {
-    let c_name = CString::new(name.label).unwrap_or_else(|_| CString::new("invalid name").unwrap());
-    track_event!(
-        "perfetto_everywhere",
-        event_type(c_name.as_ptr()),
-        |context: &mut EventContext| add_common(context, category, track, fields, flow)
-    );
+    with_event_name(name, |c_name| {
+        track_event!(
+            "perfetto_everywhere",
+            event_type(c_name.as_ptr()),
+            |context: &mut EventContext| add_common(context, category, track, fields, flow)
+        );
+    });
 }
 
 impl TraceBackend for NativeBackend {
@@ -496,19 +513,19 @@ impl TraceBackend for NativeBackend {
         if !CAPTURE_ACTIVE.load(Ordering::Acquire) {
             return EmitStatus::Disabled;
         }
-        let name = CString::new(message.label)
-            .unwrap_or_else(|_| CString::new("invalid log message").unwrap());
-        track_event!(
-            "perfetto_everywhere",
-            TrackEventType::Instant(name.as_ptr()),
-            |context: &mut EventContext| {
-                context
-                    .add_debug_arg("severity", TrackEventDebugArg::Uint64(severity as u64))
-                    .add_debug_arg("target", TrackEventDebugArg::String(target.label))
-                    .add_debug_arg("message", TrackEventDebugArg::String(message.label));
-                add_fields(context, fields);
-            }
-        );
+        with_event_name(message, |name| {
+            track_event!(
+                "perfetto_everywhere",
+                TrackEventType::Instant(name.as_ptr()),
+                |context: &mut EventContext| {
+                    context
+                        .add_debug_arg("severity", TrackEventDebugArg::Uint64(severity as u64))
+                        .add_debug_arg("target", TrackEventDebugArg::String(target.label))
+                        .add_debug_arg("message", TrackEventDebugArg::String(message.label));
+                    add_fields(context, fields);
+                }
+            );
+        });
         EmitStatus::Recorded
     }
 
