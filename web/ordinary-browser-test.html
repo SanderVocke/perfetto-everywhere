@@ -3,7 +3,7 @@
 <title>ordinary browser producer test</title>
 <pre id="status">starting</pre><pre id="summary"></pre><pre id="error"></pre>
 <script type="module">
-import init, { produce } from "./pkg/ordinary/ordinary_browser_producer.js";
+import init, { produce, produce_tracing } from "./pkg/ordinary/ordinary_browser_producer.js";
 const RECORD_SIZE = 48;
 const wait = (worker, type) => new Promise(resolve => {
   const listener = event => {
@@ -57,13 +57,20 @@ async function main() {
   workers[1].postMessage({type: "produce", flow: 0n});
   const page = produce(1, 42n);
   const results = [{realm: 1, records: page}, ...(await Promise.all(pending))];
+  const adapter = produce_tracing(10);
+  const adapterView = new DataView(adapter.buffer, adapter.byteOffset, adapter.byteLength);
+  for (let offset = 0; offset < adapter.byteLength; offset += RECORD_SIZE) {
+    if (adapterView.getUint32(offset + 4, true) !== 10) throw new Error("adapter realm mismatch");
+  }
   const summary = results.map(result => ({
     realm: result.realm,
     bytes: result.records.length,
     records: inspect(result.realm, result.records),
   }));
   for (const worker of workers) worker.terminate();
-  document.getElementById("summary").textContent = JSON.stringify({realms: summary, calibrations});
+  document.getElementById("summary").textContent = JSON.stringify({
+    realms: summary, calibrations, adapterRecords: adapter.byteLength / RECORD_SIZE,
+  });
   document.getElementById("status").textContent = "done";
   document.title = "DONE ordinary browser producer test";
 }

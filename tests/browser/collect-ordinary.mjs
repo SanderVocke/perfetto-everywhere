@@ -54,6 +54,9 @@ const summary = JSON.parse(state.summary);
 if (summary.realms.length !== 3 || summary.realms.some(item => item.records !== 8)) {
   throw new Error(`unexpected realm records: ${JSON.stringify(summary)}`);
 }
+if (summary.adapterRecords !== 9) {
+  throw new Error(`unexpected tracing adapter records: ${summary.adapterRecords}`);
+}
 if (summary.calibrations.length !== 10 || summary.calibrations.some(sample => sample.uncertaintyMs < 0)) {
   throw new Error(`invalid clock calibrations: ${JSON.stringify(summary.calibrations)}`);
 }

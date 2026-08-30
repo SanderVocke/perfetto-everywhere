@@ -68,6 +68,8 @@ jobs:
         run: |
           scripts/run-native-example.sh artifacts
           scripts/validate-native.sh
+      - name: tracing compatibility acceptance
+        run: scripts/validate-tracing.sh artifacts
       - name: Native overhead sanity check
         env:
           ITERATIONS: "10000"

@@ -2,6 +2,8 @@
 #![forbid(unsafe_code)]
 
 pub use perfetto_everywhere_core::*;
+#[cfg(feature = "tracing")]
+pub use perfetto_everywhere_tracing::{PerfettoLayer, SharedBackend};
 
 #[cfg(all(not(feature = "disabled"), not(target_arch = "wasm32")))]
 pub use perfetto_everywhere_native::{

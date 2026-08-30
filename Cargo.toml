@@ -8,6 +8,7 @@ members = [
   "crates/perfetto-everywhere-collector",
   "crates/perfetto-everywhere-tracing",
   "examples/native-capture",
+  "examples/tracing-bridge",
   "tests/browser/ordinary-producer",
 ]
 
