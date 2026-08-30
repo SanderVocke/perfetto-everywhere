@@ -69,7 +69,13 @@ export function ordinaryCalibration(realm, clock, localMs, referenceMs, uncertai
 }
 
 export class BrowserCaptureController {
-  constructor({audioCapacity = 8192, sampleRate = 48000, quantumFrames = 128} = {}) {
+  constructor({
+    audioCapacity = 8192,
+    sampleRate = 48000,
+    quantumFrames = 128,
+    collectorWorkerUrl = "multirealm-collector-worker.js",
+    collectorWorkerOptions = {type: "module"},
+  } = {}) {
     if (!crossOriginIsolated || typeof SharedArrayBuffer !== "function") {
       throw new Error("perfetto-everywhere browser capture requires COOP/COEP and SharedArrayBuffer");
     }
@@ -78,7 +84,7 @@ export class BrowserCaptureController {
     this.realms = [];
     this.metadata = new Map();
     this.calibrations = [];
-    this.collector = new Worker("multirealm-collector-worker.js", {type: "module"});
+    this.collector = new Worker(collectorWorkerUrl, collectorWorkerOptions);
     this.started = false;
     this.finished = false;
     this.drainTimer = null;

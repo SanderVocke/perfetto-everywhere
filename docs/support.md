@@ -26,7 +26,7 @@ separate header problems from application integration.
 
 Verify that the SAB header magic, capacity, sample rate, quantum size, WASM
 module, and wasm-bindgen JS/WASM versions match. The generated glue and CLI are
-pinned to 0.2.121. `TextDecoder` is absent in tested AudioWorkletGlobalScope; the
+pinned to 0.2.127. `TextDecoder` is absent in tested AudioWorkletGlobalScope; the
 provided initialization-only shim is required.
 
 ## Events are missing

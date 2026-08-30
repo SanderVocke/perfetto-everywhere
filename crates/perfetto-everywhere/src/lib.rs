@@ -10,6 +10,8 @@ pub use perfetto_everywhere_native::{
     CaptureConfig, CaptureReport, CaptureSession, NativeBackend as PlatformBackend, NativeError,
 };
 #[cfg(all(not(feature = "disabled"), target_arch = "wasm32"))]
+pub use perfetto_everywhere_raw::{RawProducerHealth, RawRingBackend};
+#[cfg(all(not(feature = "disabled"), target_arch = "wasm32"))]
 pub use perfetto_everywhere_web::{
     ClockCalibration, MetadataEntry, OrdinaryBackend, PerformanceClock, ProducerHealth,
 };

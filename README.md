@@ -169,6 +169,11 @@ periodically records `AudioContext.getOutputTimestamp()` calibrations; the
 collector emits custom Perfetto clock snapshots and raw fit diagnostics. Perfetto
 UI and SQL receive one converted timeline automatically.
 
+An import-free raw Wasm module can instead use `perfetto-everywhere-raw` to
+record into a preallocated linear-memory ring, set source timestamps explicitly,
+and drain complete groups into caller-owned transfer storage. See
+[`docs/raw-wasm.md`](docs/raw-wasm.md).
+
 See [`docs/audio-worklet.md`](docs/audio-worklet.md). Run the short test with:
 
 ```bash
@@ -216,12 +221,13 @@ tracks, and flows remain direct facade APIs. See
 | Linux native | Automated | `perfetto-sdk` 1.1.1 in-process |
 | `wasm32-unknown-unknown` Window/Worker | Automated in Chromium | bounded ordinary producer |
 | `wasm32-unknown-unknown` AudioWorklet | Automated in Chromium | bounded SAB ring |
+| Import-free raw Wasm | Unit/Wasm checks | bounded linear-memory ring |
 | `disabled` | Automated native/WASM | no-op backend |
 | `tracing` | Automated native/ordinary WASM | compatibility layer |
 | Firefox/Safari | Not claimed | requires compatibility validation |
 | Native system/ftrace | Optional, not required | future backend configuration |
 
-The MSRV is Rust 1.85.0. Browser WASM uses wasm-bindgen 0.2.121. The current
+The MSRV is Rust 1.85.0. Browser WASM uses wasm-bindgen 0.2.127. The current
 supported automated browser is Chromium; code feature-detects required Web APIs
 and fails with actionable errors rather than claiming untested support.
 
