@@ -17,7 +17,7 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Install Rust components and protobuf compiler
         run: |
           rustup component add rustfmt clippy
@@ -29,20 +29,23 @@ jobs:
         run: cargo clippy --workspace --all-targets --all-features -- -D warnings
       - name: Unit tests
         run: cargo test --workspace --all-features
+      - name: Facade feature powerset
+        run: |
+          cargo check -p perfetto-everywhere
+          cargo check -p perfetto-everywhere --features disabled
+          cargo check -p perfetto-everywhere --features tracing
+          cargo check -p perfetto-everywhere --features disabled,tracing
       - name: Documentation
         env:
           RUSTDOCFLAGS: -Dwarnings
         run: cargo doc --workspace --all-features --no-deps
-      - name: Validate package contents
-        run: |
-          for manifest in crates/*/Cargo.toml; do
-            cargo package --manifest-path "$manifest" --list >/dev/null
-          done
+      - name: Package and verify publishable workspace crates
+        run: scripts/package-workspace.sh
 
   collector:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Install protobuf compiler
         run: |
           sudo apt-get update
@@ -52,10 +55,42 @@ jobs:
           cargo test -p perfetto-everywhere-collector
           scripts/validate-collector.sh artifacts
 
+  msrv:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Install MSRV, WASM target, and protobuf compiler
+        run: |
+          rustup toolchain install 1.85.0 --profile minimal
+          rustup target add --toolchain 1.85.0 wasm32-unknown-unknown
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
+      - name: MSRV native tests
+        run: cargo +1.85.0 test --workspace --all-features
+      - name: MSRV WASM check
+        run: >-
+          cargo +1.85.0 check --target wasm32-unknown-unknown
+          -p perfetto-everywhere
+          -p perfetto-everywhere-core
+          -p perfetto-everywhere-web
+          -p perfetto-everywhere-collector
+          -p perfetto-everywhere-tracing
+
+  security-and-licenses:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: License metadata policy
+        run: scripts/check-licenses.py
+      - name: RustSec audit
+        run: |
+          cargo install cargo-audit --locked
+          cargo audit
+
   native:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Install protobuf compiler
         run: |
           sudo apt-get update
@@ -79,7 +114,7 @@ jobs:
   browser:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Install WASM target, bindgen CLI, and protobuf compiler
         run: |
           rustup target add wasm32-unknown-unknown
@@ -98,11 +133,28 @@ jobs:
         run: |
           scripts/run-browser-multirealm.sh artifacts
           scripts/validate-browser-multirealm.sh artifacts
+          scripts/capture-browser-ui.sh artifacts/browser-ui.png
+      - name: Upload browser acceptance artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: browser-acceptance-${{ github.sha }}
+          path: |
+            artifacts/ordinary-browser.json
+            artifacts/audio-transport.json
+            artifacts/audio-transport.pftrace
+            artifacts/audio-query.txt
+            artifacts/browser-multirealm.json
+            artifacts/browser-multirealm.pftrace
+            artifacts/browser-multirealm-query.txt
+            artifacts/browser-ui.png
+          if-no-files-found: error
+          retention-days: 14
 
   wasm:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Install WASM target and protobuf compiler
         run: |
           rustup target add wasm32-unknown-unknown
@@ -116,7 +168,8 @@ jobs:
           -p perfetto-everywhere-web
           -p perfetto-everywhere-collector
           -p perfetto-everywhere-tracing
-      - name: WASM disabled API contract
-        run: >-
-          cargo check --target wasm32-unknown-unknown
-          -p perfetto-everywhere --features disabled --examples
+      - name: WASM facade feature powerset
+        run: |
+          cargo check --target wasm32-unknown-unknown -p perfetto-everywhere --features disabled --examples
+          cargo check --target wasm32-unknown-unknown -p perfetto-everywhere --features tracing
+          cargo check --target wasm32-unknown-unknown -p perfetto-everywhere --features disabled,tracing

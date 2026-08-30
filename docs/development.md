@@ -2,10 +2,11 @@
 
 ## Toolchain
 
-The workspace MSRV is Rust 1.85.0. `flake.nix` provides that compiler, the
-`wasm32-unknown-unknown` standard library, Chromium, Node, protobuf tooling, and
-native C/C++ build tools. CI additionally tests the current GitHub-hosted stable
-compiler until an explicit matrix is added.
+The workspace MSRV is Rust 1.85.0 and has a dedicated CI job. `flake.nix`
+provides Rust/Cargo 1.90.0 so clean local validation can use Cargo's stabilized
+workspace packaging, plus the `wasm32-unknown-unknown` standard library,
+Chromium, Node, protobuf tooling, and native C/C++ build tools. CI also tests the
+current GitHub-hosted stable compiler.
 
 ```bash
 nix develop --command scripts/check.sh

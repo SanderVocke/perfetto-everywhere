@@ -16,7 +16,7 @@
         inherit system;
         overlays = [ (import rust-overlay) ];
       };
-      rust = pkgs.rust-bin.stable."1.85.0".default.override {
+      rust = pkgs.rust-bin.stable."1.90.0".default.override {
         extensions = [ "clippy" "rustfmt" "rust-src" ];
         targets = [ "wasm32-unknown-unknown" ];
       };
@@ -24,6 +24,7 @@
       devShells.${system}.default = pkgs.mkShell {
         packages = with pkgs; [
           rust
+          cargo-audit
           clang
           cmake
           ninja
