@@ -65,6 +65,8 @@ pub struct ProducerHealth {
     pub dropped_records: u64,
     pub completed_batches: u64,
     pub high_water_records: usize,
+    /// Collector-side repairs of unmatched span boundaries attributed to this realm.
+    pub repaired_span_boundaries: u64,
 }
 
 #[derive(Debug)]

@@ -15,8 +15,11 @@ the pinned/current supported Trace Processor validation before merge.
 `Collector` registers realms and metadata, ingests only complete versioned
 record batches, validates all realm/metadata/clock references, enforces a
 configurable record limit, and rejects malformed versions, fields, groups,
-collisions, and clock samples. It emits deterministic descriptors, events,
-typed fields, counters, flows, producer-health events, and final protobuf bytes.
+collisions, and clock samples. Unmatched span ends are discarded and unmatched
+begins receive a synthetic end at the realm's last source timestamp; both are
+counted as `repaired_span_boundaries` in producer-health events. It emits
+deterministic descriptors, events, typed fields, counters, flows, health events,
+and final protobuf bytes.
 `WasmCollector` exposes the same operations to a collector Worker.
 
 Long captures are bounded by `max_records`; production applications must stop or

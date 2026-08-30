@@ -222,6 +222,14 @@ impl Collector {
                 group.header.kind as u8,
             )
         });
+        self.repair_span_boundaries();
+        self.groups.sort_by_key(|group| {
+            (
+                group.header.realm_id,
+                group.header.timestamp,
+                group.header.kind as u8,
+            )
+        });
 
         let mut packets = Vec::new();
         self.emit_clock_snapshots(&mut packets)?;
@@ -229,6 +237,70 @@ impl Collector {
         self.emit_events(&mut packets)?;
         self.emit_health(&mut packets)?;
         Ok(Trace { packet: packets }.encode_to_vec())
+    }
+
+    fn repair_span_boundaries(&mut self) {
+        let mut depths: BTreeMap<(u32, u64), usize> = BTreeMap::new();
+        let mut last_clock_and_timestamp: BTreeMap<u32, (u32, u64)> = BTreeMap::new();
+        let mut retained = Vec::with_capacity(self.groups.len());
+        for group in self.groups.drain(..) {
+            let realm = group.header.realm_id;
+            last_clock_and_timestamp
+                .entry(realm)
+                .and_modify(|entry| {
+                    if group.header.timestamp > entry.1 {
+                        *entry = (group.header.clock_id, group.header.timestamp);
+                    }
+                })
+                .or_insert((group.header.clock_id, group.header.timestamp));
+            let key = (realm, group.header.arg);
+            match group.header.kind {
+                RecordKind::SpanBegin => {
+                    *depths.entry(key).or_default() += 1;
+                    retained.push(group);
+                }
+                RecordKind::SpanEnd => {
+                    let depth = depths.entry(key).or_default();
+                    if *depth == 0 {
+                        self.health
+                            .entry(realm)
+                            .or_default()
+                            .repaired_span_boundaries += 1;
+                    } else {
+                        *depth -= 1;
+                        retained.push(group);
+                    }
+                }
+                _ => retained.push(group),
+            }
+        }
+        for ((realm, track), depth) in depths {
+            let Some((clock_id, timestamp)) = last_clock_and_timestamp.get(&realm).copied() else {
+                continue;
+            };
+            for offset in 0..depth {
+                retained.push(EventGroup {
+                    header: Record::new(
+                        RecordKind::SpanEnd,
+                        perfetto_everywhere_core::FLAG_GROUP_START
+                            | perfetto_everywhere_core::FLAG_GROUP_END,
+                        realm,
+                        0,
+                        clock_id,
+                        timestamp.saturating_add(offset as u64 + 1),
+                        0,
+                        0,
+                        track,
+                    ),
+                    fields: Vec::new(),
+                });
+                self.health
+                    .entry(realm)
+                    .or_default()
+                    .repaired_span_boundaries += 1;
+            }
+        }
+        self.groups = retained;
     }
 
     fn validate_references(&self) -> Result<(), CollectorError> {
@@ -315,7 +387,8 @@ impl Collector {
     }
 
     fn emit_descriptors(&self, packets: &mut Vec<TracePacket>) -> Result<(), CollectorError> {
-        let mut event_tracks = BTreeSet::new();
+        let mut event_tracks: BTreeSet<(u32, u64)> =
+            self.health.keys().map(|realm| (*realm, 0)).collect();
         let mut counter_tracks = BTreeSet::new();
         for group in &self.groups {
             let track = if group.header.kind == RecordKind::Log {
@@ -541,6 +614,10 @@ impl Collector {
                     annotation(
                         "high_water_records",
                         debug_annotation::Value::UintValue(health.high_water_records as u64),
+                    ),
+                    annotation(
+                        "repaired_span_boundaries",
+                        debug_annotation::Value::UintValue(health.repaired_span_boundaries),
                     ),
                 ],
                 ..Default::default()
@@ -839,6 +916,38 @@ mod tests {
             collector.finish(),
             Err(CollectorError::UnknownMetadata(999))
         );
+    }
+
+    #[test]
+    fn repairs_and_reports_incomplete_span_boundaries() {
+        let mut collector = configured();
+        let mut open = record(1, 1_100);
+        open.kind = RecordKind::SpanBegin;
+        collector.ingest_batch(&open.encode()).unwrap();
+        let bytes = collector.finish().unwrap();
+        let trace = Trace::decode(bytes.as_slice()).unwrap();
+        let events: Vec<&TrackEvent> = trace
+            .packet
+            .iter()
+            .filter_map(|packet| match &packet.data {
+                Some(trace_packet::Data::TrackEvent(event)) => Some(event),
+                _ => None,
+            })
+            .collect();
+        assert!(
+            events
+                .iter()
+                .any(|event| event.r#type == Some(track_event::Type::SliceEnd as i32))
+        );
+        assert!(events.iter().any(|event| {
+            event.debug_annotations.iter().any(|annotation| {
+                annotation.name_field
+                    == Some(debug_annotation::NameField::Name(
+                        "repaired_span_boundaries".to_owned(),
+                    ))
+                    && annotation.value == Some(debug_annotation::Value::UintValue(1))
+            })
+        }));
     }
 
     #[test]
