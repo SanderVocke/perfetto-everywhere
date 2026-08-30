@@ -33,6 +33,12 @@ JOIN args USING (arg_set_id)
 WHERE slice.name = 'request graph rebuild'
 ORDER BY key;
 
+SELECT DISTINCT key, display_value
+FROM slice
+JOIN args USING (arg_set_id)
+WHERE slice.name = 'worker ready'
+ORDER BY key, display_value;
+
 SELECT COUNT(*) - COUNT(DISTINCT id) AS duplicate_track_ids FROM track;
 SELECT COUNT(*) AS negative_slices FROM slice WHERE dur < 0;
 SELECT COALESCE(SUM(value), 0) AS serious_import_errors
