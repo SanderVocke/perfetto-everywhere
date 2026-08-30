@@ -24,7 +24,7 @@ to direct evidence.
 | 9. User experience | Comprehensive `README.md`, rustdoc, native/browser/audio/tracing quick starts, examples, deployment headers, support/clock/safety docs and matrices | PASS |
 | 10. Reproducibility/quality | Nix lock, Cargo lock, Rust 1.85/current, fmt/clippy/tests/docs, native/WASM/browser, RustSec/license policy, verified workspace packaging, `scripts/check.sh` | PASS |
 | 11. Green GitHub Actions | Final evidence commit `cb88982`: CI run `33287000510`, browser artifact `9724768387`; full run `33287008954`, audio artifact `9724794921` | PASS |
-| 12. Evidence-backed release | This audit, stage verification docs, clean-clone log/hash, CI URLs, clean/pushed upstream and matching parent gitlink | PASS after final parent pointer commit |
+| 12. Evidence-backed release | This audit, stage verification docs, clean-clone log/hash, CI URLs, clean/pushed upstream and matching parent gitlink | **BLOCKED:** parent prototype has no configured remote, so its clean final commit cannot be pushed without a user-approved destination |
 
 ## Explicit architecture and functionality mapping
 
@@ -97,6 +97,12 @@ The clean full audio result (`docs/evidence/clean-audio.json`) was 22,500
 baseline callbacks/zero discontinuities and 22,536 traced callbacks/90,145
 records/zero drops/zero discontinuities, 145-record high water, 122 clock
 calibrations, 0.010 ms p99 versus the 0.267 ms threshold, and a 6.88 MB trace.
+
+The implementation upstream is clean and pushed, and the parent gitlink is
+committed locally at the audited implementation commit. The parent prototype
+repository has no configured remote; creating/pushing an additional parent
+repository was not part of the explicitly named GitHub destination and requires
+a user decision before criterion 12 can be marked complete.
 
 Final evidence commit `cb8898293a6aed9358227ffe72b72bef89c6659d` passed
 all seven required jobs in CI run
