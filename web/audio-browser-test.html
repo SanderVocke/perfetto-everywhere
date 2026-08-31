@@ -89,7 +89,7 @@ async function main() {
   const baselineReady = await waitMessage(baselineNode.port, data => data.type === "ready" || data.type === "error");
   if (baselineReady.type === "error") throw new Error(baselineReady.error);
   await context.resume();
-  await new Promise(resolve => setTimeout(resolve, durationMs));
+  await new Promise(resolve => setTimeout(resolve, Math.min(durationMs, 3000)));
   await context.suspend();
   const baselineStopped = waitMessage(baselineNode.port, data => data.type === "trace-stopped");
   baselineNode.port.postMessage({type: "stop"});

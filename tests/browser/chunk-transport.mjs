@@ -18,6 +18,14 @@ class Producer {
   discontinuities() { return 0n; }
 }
 
+class BulkProducer extends Producer {
+  drain(maximum) {
+    const count = Math.min(this.records, Math.floor(maximum / 48));
+    this.records -= count;
+    return new Uint8Array(count * 48);
+  }
+}
+
 class Port {
   constructor() { this.messages = []; }
   postMessage(message, transfer = []) { this.messages.push(structuredClone(message, {transfer})); }
@@ -40,6 +48,21 @@ test("captures beyond the complete pool by recycling", () => {
   }
   transport.stop();
   assert.equal(port.messages.find(message => message.type === "trace-stopped").chunkCount, 10);
+});
+
+test("capture length exceeds the former 262144-record retention limit", () => {
+  const producer = new BulkProducer(262145);
+  const port = new Port();
+  const transport = new TraceChunkProducerTransport(producer, port, {
+    captureId: 5, capacityRecords: 8192, chunkBytes: 8192 * 48, poolSize: 3,
+  });
+  while (producer.records > 0) {
+    transport.drain();
+    const chunk = port.messages.find(message => message.type === "trace-chunk");
+    if (chunk) { port.messages.splice(port.messages.indexOf(chunk), 1); recycle(transport, chunk); }
+  }
+  transport.stop();
+  assert.equal(port.messages.find(message => message.type === "trace-stopped").chunkCount, 33);
 });
 
 test("stop during starvation completes asynchronously after recycle", () => {
