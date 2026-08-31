@@ -122,9 +122,7 @@ async function main() {
   clearInterval(calibrationTimer);
   calibrateAudio();
   await context.suspend();
-  const stopped = waitMessage(node.port, data => data.type === "trace-stopped");
-  node.port.postMessage({type: "stop"});
-  await stopped;
+  await controller.stopAudio();
   for (const sample of calibrations) controller.addCalibration(sample);
   const result = await controller.finish();
   const restartProbe = new BrowserCaptureController({

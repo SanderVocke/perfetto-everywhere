@@ -108,6 +108,29 @@ export class BrowserCaptureController {
     });
   }
 
+  async stopAudio(timeoutMs = 5000) {
+    if (!this.audioPort || this.audioStatus) return this.audioStatus;
+    const completion = waitMessage(
+      this.audioPort,
+      data => data.type === "trace-stopped" || data.type === "trace-aborted",
+    );
+    this.audioPort.postMessage({type: "stop"});
+    let timeout;
+    const expired = new Promise((_, reject) => {
+      timeout = setTimeout(() => reject(new Error("audio trace stop timed out")), timeoutMs);
+    });
+    try {
+      const status = await Promise.race([completion, expired]);
+      if (status.type === "trace-aborted") throw new Error(status.reason || "audio trace aborted");
+      return status;
+    } catch (error) {
+      this.audioPort.postMessage({type: "abort", reason: error.message});
+      throw error;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
   registerRealm(id, label, ticksPerSecond) {
     if (this.realms.some(realm => realm.id === id)) throw new Error(`duplicate realm ${id}`);
     this.realms.push({id, label, ticksPerSecond});
