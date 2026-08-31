@@ -18,14 +18,11 @@ just compilation—before updating this table.
 
 ## Browser capture will not start
 
-Check `crossOriginIsolated`, `SharedArrayBuffer`, module-worker support, and the
-console error. Every subresource must satisfy COEP. Use `scripts/serve.py` to
-separate header problems from application integration.
+Check transferable `ArrayBuffer`, module Worker, AudioWorklet, and `MessagePort` support plus the console error. Trace transport itself requires no isolation headers.
 
 ## AudioWorklet constructor fails
 
-Verify that the SAB header magic, capacity, sample rate, quantum size, WASM
-module, and wasm-bindgen JS/WASM versions match. The generated glue and CLI are
+Verify that the chunk capacity/pool size, realm and clock IDs, WASM module, and wasm-bindgen JS/WASM versions match. The generated glue and CLI are
 pinned to 0.2.127. `TextDecoder` is absent in tested AudioWorkletGlobalScope; the
 provided initialization-only shim is required.
 

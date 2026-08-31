@@ -674,12 +674,36 @@ impl Collector {
                         debug_annotation::Value::UintValue(health.dropped_records),
                     ),
                     annotation(
+                        "raw_dropped_records",
+                        debug_annotation::Value::UintValue(health.raw_dropped_records),
+                    ),
+                    annotation(
+                        "pool_starvation_records",
+                        debug_annotation::Value::UintValue(health.pool_starvation_records),
+                    ),
+                    annotation(
                         "completed_batches",
                         debug_annotation::Value::UintValue(health.completed_batches),
                     ),
                     annotation(
                         "high_water_records",
                         debug_annotation::Value::UintValue(health.high_water_records as u64),
+                    ),
+                    annotation(
+                        "max_in_flight_chunks",
+                        debug_annotation::Value::UintValue(health.max_in_flight_chunks as u64),
+                    ),
+                    annotation(
+                        "returned_buffers",
+                        debug_annotation::Value::UintValue(health.returned_buffers),
+                    ),
+                    annotation(
+                        "rejected_chunks",
+                        debug_annotation::Value::UintValue(health.rejected_chunks),
+                    ),
+                    annotation(
+                        "storage_failures",
+                        debug_annotation::Value::UintValue(health.storage_failures),
                     ),
                     annotation(
                         "repaired_span_boundaries",
@@ -869,11 +893,34 @@ mod wasm {
                 ProducerHealth {
                     emitted_records,
                     dropped_records,
+                    raw_dropped_records: dropped_records,
                     completed_batches,
                     high_water_records,
                     repaired_span_boundaries,
+                    ..ProducerHealth::default()
                 },
             );
+            Ok(())
+        }
+
+        pub fn set_transport_health(
+            &mut self,
+            realm_id: u32,
+            raw_dropped_records: u64,
+            pool_starvation_records: u64,
+            max_in_flight_chunks: usize,
+            returned_buffers: u64,
+            rejected_chunks: u64,
+            storage_failures: u64,
+        ) -> Result<(), JsValue> {
+            let collector = self.inner_mut()?;
+            let health = collector.health.entry(realm_id).or_default();
+            health.raw_dropped_records = raw_dropped_records;
+            health.pool_starvation_records = pool_starvation_records;
+            health.max_in_flight_chunks = max_in_flight_chunks;
+            health.returned_buffers = returned_buffers;
+            health.rejected_chunks = rejected_chunks;
+            health.storage_failures = storage_failures;
             Ok(())
         }
 

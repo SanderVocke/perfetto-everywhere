@@ -2,10 +2,15 @@
 #![forbid(unsafe_code)]
 
 mod audio;
+mod chunks;
 
-pub use audio::{AUDIO_HEADER_BYTES, AUDIO_HEADER_WORDS, AUDIO_RING_MAGIC, ring_can_reserve};
+pub use chunks::{
+    CHUNK_PROTOCOL_VERSION, ChunkCollectorState, ChunkDescriptor, ChunkPoolConfig,
+    ChunkProtocolError, ChunkTransportHealth, MemoryChunkSink, StoppedDescriptor,
+};
+
 #[cfg(target_arch = "wasm32")]
-pub use audio::{AudioRingBackend, AudioRingProducer};
+pub use audio::AudioChunkProducer;
 
 use perfetto_everywhere_core::{
     Category, EmitStatus, FLAG_FLOW_STEP, FLAG_FLOW_TERMINATE, FLAG_GROUP_END, FLAG_GROUP_START,
@@ -69,8 +74,14 @@ pub struct ClockCalibration {
 pub struct ProducerHealth {
     pub emitted_records: u64,
     pub dropped_records: u64,
+    pub raw_dropped_records: u64,
+    pub pool_starvation_records: u64,
     pub completed_batches: u64,
     pub high_water_records: usize,
+    pub max_in_flight_chunks: usize,
+    pub returned_buffers: u64,
+    pub rejected_chunks: u64,
+    pub storage_failures: u64,
     /// Collector-side repairs of unmatched span boundaries attributed to this realm.
     pub repaired_span_boundaries: u64,
 }
@@ -256,10 +267,10 @@ impl<C: SourceClock> OrdinaryBackend<C> {
                 return false;
             }
             match field.value {
-                FieldValue::StaticStr(value) => {
-                    if !self.register_metadata(value.id, 1, value.label) {
-                        return false;
-                    }
+                FieldValue::StaticStr(value)
+                    if !self.register_metadata(value.id, 1, value.label) =>
+                {
+                    return false;
                 }
                 FieldValue::Str(value) => {
                     let id = MetadataId::for_label(4, value);

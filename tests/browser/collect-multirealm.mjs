@@ -33,6 +33,14 @@ async function evaluate(expression) {
   const result = await command("Runtime.evaluate", {expression, returnByValue: true});
   return result.result.value;
 }
+async function readElementText(id) {
+  const length = await evaluate(`document.getElementById(${JSON.stringify(id)})?.textContent.length ?? 0`);
+  const parts = [];
+  for (let start = 0; start < length; start += 512 * 1024) {
+    parts.push(await evaluate(`document.getElementById(${JSON.stringify(id)}).textContent.slice(${start}, ${start + 512 * 1024})`));
+  }
+  return parts.join("");
+}
 let title = "";
 for (let attempt = 0; attempt < 600; attempt++) {
   try { title = await evaluate("document.title"); } catch {}
@@ -42,12 +50,12 @@ for (let attempt = 0; attempt < 600; attempt++) {
 const state = JSON.parse(await evaluate(`JSON.stringify({
   title: document.title,
   summary: document.getElementById("summary")?.textContent,
-  error: document.getElementById("error")?.textContent,
-  trace: document.getElementById("trace")?.textContent
+  error: document.getElementById("error")?.textContent
 })`));
 if (!state.title.startsWith("DONE")) throw new Error(`multirealm example failed: ${JSON.stringify(state)}`);
 const summary = JSON.parse(state.summary);
+const trace = await readElementText("trace");
 await writeFile(`${output}/browser-multirealm.json`, JSON.stringify(summary, null, 2) + "\n");
-await writeFile(`${output}/browser-multirealm.pftrace`, Buffer.from(state.trace, "base64"));
+await writeFile(`${output}/browser-multirealm.pftrace`, Buffer.from(trace, "base64"));
 console.log(JSON.stringify(summary));
 socket.close();

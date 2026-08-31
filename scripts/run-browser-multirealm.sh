@@ -17,7 +17,7 @@ debug_port=$(free_port)
 profile=$(mktemp -d)
 server_log=$(mktemp)
 browser_log=$(mktemp)
-python3 scripts/serve.py --port "$port" >"$server_log" 2>&1 &
+python3 scripts/serve.py --no-isolation --port "$port" >"$server_log" 2>&1 &
 server_pid=$!
 chrome=${CHROME_BIN:-}
 if [[ -z "$chrome" ]]; then

@@ -46,9 +46,6 @@ function pageCalibration() {
   );
 }
 async function main() {
-  if (!crossOriginIsolated || typeof SharedArrayBuffer !== "function") {
-    throw new Error("COOP/COEP and SharedArrayBuffer are required");
-  }
   await initProducer();
   const workers = [2, 3].map(realm => new Worker(`ordinary-worker.js?realm=${realm}`, {type: "module"}));
   await Promise.all(workers.map(worker => waitMessage(worker, data => data.type === "ready")));
@@ -64,7 +61,6 @@ async function main() {
   ]) controller.registerRealm(realm.id, realm.label, realm.ticksPerSecond);
   controller.registerMetadata(allMetadata());
   await controller.start();
-  const ring = controller.audioRing;
 
   const calibrations = [pageCalibration()];
   for (let index = 0; index < workers.length; index++) {
@@ -95,11 +91,13 @@ async function main() {
   await context.audioWorklet.addModule("perfetto-audio-worklet.js");
   const node = new AudioWorkletNode(context, "perfetto-audio", {
     processorOptions: {
-      sab: ring.sab, wasmModule, realmId: 4, clockId: 104, flow: 42n, record: true,
+      ...controller.audioConfig, captureId: 4, wasmModule,
+      realmId: 4, clockId: 104, flow: 42n, record: true,
     },
   });
   node.connect(context.destination);
   node.port.start();
+  controller.attachAudioPort(node.port);
   const audioReady = await waitMessage(node.port, data => data.type === "ready" || data.type === "error");
   if (audioReady.type === "error") throw new Error(audioReady.error);
   await context.resume();
@@ -120,14 +118,11 @@ async function main() {
   }
   calibrateAudio();
   const calibrationTimer = setInterval(calibrateAudio, 500);
-  controller.startAudioDrain(2);
   await new Promise(resolve => setTimeout(resolve, durationMs));
   clearInterval(calibrationTimer);
   calibrateAudio();
   await context.suspend();
-  const stopped = waitMessage(node.port, data => data.type === "stopped");
-  node.port.postMessage({type: "stop"});
-  await stopped;
+  await controller.stopAudio();
   for (const sample of calibrations) controller.addCalibration(sample);
   const result = await controller.finish();
   const restartProbe = new BrowserCaptureController({

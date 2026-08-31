@@ -14,10 +14,7 @@ vulnerability. Removing it requires an upstream SDK update and must retain nativ
 trace compatibility tests.
 
 Malformed browser records, unknown versions/metadata/clocks, collisions, limits,
-and non-monotonic/noisy calibration are rejected. The AudioWorklet producer
-never parses untrusted dynamic strings or protobuf. SharedArrayBuffer is
-same-origin/cross-origin-isolated and is not exposed over a network by the
-library.
+and non-monotonic/noisy calibration are rejected. The AudioWorklet producer never parses untrusted dynamic strings or protobuf. Transferable chunk ownership is validated with capture IDs, sequences, and pool tokens; the library performs no network transfer.
 
 Please report suspected vulnerabilities privately to the repository owner before
 opening a public issue containing exploit or sensitive trace data.

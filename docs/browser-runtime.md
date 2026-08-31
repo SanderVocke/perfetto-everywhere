@@ -7,7 +7,7 @@ the Web platform around the Rust/WASM API. `BrowserCaptureController` owns:
 - collector Worker startup and shutdown;
 - realm/metadata/calibration registration;
 - transferable ordinary-realm batches;
-- AudioWorklet SAB allocation and drain scheduling;
+- AudioWorklet transferable chunk allocation and recycling;
 - final collector request, errors, and application-owned trace bytes.
 
 Platform setup remains explicit while all instrumentation callsites stay in the
