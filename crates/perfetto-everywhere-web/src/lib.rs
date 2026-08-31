@@ -2,6 +2,12 @@
 #![forbid(unsafe_code)]
 
 mod audio;
+mod chunks;
+
+pub use chunks::{
+    CHUNK_PROTOCOL_VERSION, ChunkCollectorState, ChunkDescriptor, ChunkPoolConfig,
+    ChunkProtocolError, ChunkTransportHealth, MemoryChunkSink, StoppedDescriptor,
+};
 
 pub use audio::{AUDIO_HEADER_BYTES, AUDIO_HEADER_WORDS, AUDIO_RING_MAGIC, ring_can_reserve};
 #[cfg(target_arch = "wasm32")]
@@ -256,10 +262,10 @@ impl<C: SourceClock> OrdinaryBackend<C> {
                 return false;
             }
             match field.value {
-                FieldValue::StaticStr(value) => {
-                    if !self.register_metadata(value.id, 1, value.label) {
-                        return false;
-                    }
+                FieldValue::StaticStr(value)
+                    if !self.register_metadata(value.id, 1, value.label) =>
+                {
+                    return false;
                 }
                 FieldValue::Str(value) => {
                     let id = MetadataId::for_label(4, value);
