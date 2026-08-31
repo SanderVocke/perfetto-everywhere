@@ -67,6 +67,11 @@ self.onmessage = async event => {
         4, BigInt(audioStatus.emittedRecords), BigInt(audioStatus.droppedRecords),
         BigInt(audioStatus.chunkCount), audioStatus.highWaterRecords, 0n,
       );
+      collector.set_transport_health(
+        4, audioStatus.rawDroppedRecords, audioStatus.poolStarvationRecords,
+        audioStatus.maxInFlight, BigInt(audioStatus.returnedBuffers),
+        BigInt(audioStatus.rejectedChunks), 0n,
+      );
     }
     const trace = collector.finish();
     self.postMessage({

@@ -45,6 +45,11 @@ self.onmessage = async event => {
       4, BigInt(message.status.emittedRecords), BigInt(message.status.droppedRecords),
       BigInt(message.status.chunkCount), message.status.highWaterRecords, 0n,
     );
+    collector.set_transport_health(
+      4, message.status.rawDroppedRecords, message.status.poolStarvationRecords,
+      message.status.maxInFlight, BigInt(message.status.returnedBuffers),
+      BigInt(message.status.rejectedChunks), 0n,
+    );
     const trace = collector.finish();
     self.postMessage({
       type: "trace", trace, records: recordCount, callbacks: message.status.callbacks,

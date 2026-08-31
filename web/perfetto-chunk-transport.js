@@ -20,6 +20,10 @@ export class TraceChunkProducerTransport {
     this.inFlight = new Array(poolSize).fill(false);
     this.inFlightCount = 0;
     this.maxInFlight = 0;
+    this.returnedBuffers = 0;
+    this.poolStarvationRecords = 0n;
+    this.starvationDropStart = null;
+    this.rejectedChunks = 0;
     for (let token = 0; token < poolSize; token++) {
       const buffer = new ArrayBuffer(chunkBytes);
       this.available.push({token, buffer, bytes: new Uint8Array(buffer), used: 0});
@@ -33,7 +37,12 @@ export class TraceChunkProducerTransport {
   drain() {
     while (this.producer.available_records() > 0) {
       if (!this.active) this.active = this.available.pop() || null;
-      if (!this.active) return false;
+      if (!this.active) {
+        if (this.starvationDropStart === null) {
+          this.starvationDropStart = this.producer.dropped_records();
+        }
+        return false;
+      }
       const drained = this.producer.drain(this.chunkBytes - this.active.used);
       if (drained.length > 0) {
         this.active.bytes.set(drained, this.active.used);
@@ -63,12 +72,20 @@ export class TraceChunkProducerTransport {
 
   recycle(message) {
     if (message.captureId !== this.captureId || this.finished) return;
-    if (!this.inFlight[message.poolToken]) throw new Error("invalid recycled pool token");
+    if (!this.inFlight[message.poolToken]) {
+      this.rejectedChunks++;
+      throw new Error("invalid recycled pool token");
+    }
     if (!(message.buffer instanceof ArrayBuffer) || message.buffer.byteLength !== this.chunkBytes) {
       throw new Error("invalid recycled buffer");
     }
     this.inFlight[message.poolToken] = false;
     this.inFlightCount--;
+    this.returnedBuffers++;
+    if (this.starvationDropStart !== null) {
+      this.poolStarvationRecords += this.producer.dropped_records() - this.starvationDropStart;
+      this.starvationDropStart = null;
+    }
     this.available.push({
       token: message.poolToken, buffer: message.buffer,
       bytes: new Uint8Array(message.buffer), used: 0,
@@ -95,14 +112,19 @@ export class TraceChunkProducerTransport {
     if (!this.stopping || this.finished || !this.drain()) return;
     this.transferActive();
     this.finished = true;
+    const droppedRecords = this.producer.dropped_records();
     this.port.postMessage({
       type: "trace-stopped", captureId: this.captureId, chunkCount: this.sequence,
       emittedRecords: this.producer.emitted_records(),
-      droppedRecords: this.producer.dropped_records(),
+      droppedRecords,
+      rawDroppedRecords: droppedRecords - this.poolStarvationRecords,
+      poolStarvationRecords: this.poolStarvationRecords,
       highWaterRecords: this.producer.high_water_records(),
       callbacks: this.producer.callbacks(),
       discontinuities: this.producer.discontinuities(),
       maxInFlight: this.maxInFlight,
+      returnedBuffers: this.returnedBuffers,
+      rejectedChunks: this.rejectedChunks,
       ...this.stopping,
     });
   }

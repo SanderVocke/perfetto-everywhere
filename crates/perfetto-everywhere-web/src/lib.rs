@@ -74,8 +74,14 @@ pub struct ClockCalibration {
 pub struct ProducerHealth {
     pub emitted_records: u64,
     pub dropped_records: u64,
+    pub raw_dropped_records: u64,
+    pub pool_starvation_records: u64,
     pub completed_batches: u64,
     pub high_water_records: usize,
+    pub max_in_flight_chunks: usize,
+    pub returned_buffers: u64,
+    pub rejected_chunks: u64,
+    pub storage_failures: u64,
     /// Collector-side repairs of unmatched span boundaries attributed to this realm.
     pub repaired_span_boundaries: u64,
 }
