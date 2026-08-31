@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cargo fmt --all --check
+node --test tests/browser/chunk-transport.mjs
 cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo test --workspace --all-features
 RUSTDOCFLAGS=-Dwarnings cargo doc --workspace --all-features --no-deps

@@ -84,6 +84,13 @@ export class TraceChunkProducerTransport {
     this.tryFinish();
   }
 
+  abort(reason = "capture aborted") {
+    if (this.finished) return;
+    this.producer.finish();
+    this.finished = true;
+    this.port.postMessage({type: "trace-aborted", captureId: this.captureId, reason});
+  }
+
   tryFinish() {
     if (!this.stopping || this.finished || !this.drain()) return;
     this.transferActive();

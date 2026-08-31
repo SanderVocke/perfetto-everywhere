@@ -131,6 +131,7 @@ export class BrowserCaptureController {
   }
 
   abort() {
+    this.audioPort?.postMessage({type: "abort", reason: "collector aborted"});
     this.finished = true;
     this.collector.terminate();
   }

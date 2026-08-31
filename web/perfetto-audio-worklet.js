@@ -16,6 +16,7 @@ class PerfettoAudioProcessor extends AudioWorkletProcessor {
       this.port.onmessage = event => {
         if (event.data.type === "recycle") this.transport.recycle(event.data);
         if (event.data.type === "stop") this.transport.stop();
+        if (event.data.type === "abort") this.transport.abort(event.data.reason);
       };
       this.port.postMessage({type: "ready"});
     } catch (error) {
