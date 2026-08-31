@@ -1,16 +1,4 @@
 export const PERFETTO_RECORD_SIZE = 48;
-export const PERFETTO_AUDIO_HEADER_BYTES = 64;
-export const PERFETTO_AUDIO_MAGIC = 0x50454631;
-
-export function createAudioRing(capacity, sampleRate, quantumFrames) {
-  const sab = new SharedArrayBuffer(PERFETTO_AUDIO_HEADER_BYTES + capacity * PERFETTO_RECORD_SIZE);
-  const header = new Int32Array(sab, 0, 16);
-  header[0] = PERFETTO_AUDIO_MAGIC;
-  header[1] = capacity;
-  header[9] = sampleRate;
-  header[10] = quantumFrames;
-  return {sab, header, capacity};
-}
 
 export function metadataId(namespace, label) {
   let hash = (0x811c9dc5 ^ namespace) >>> 0;
@@ -76,10 +64,13 @@ export class BrowserCaptureController {
     collectorWorkerUrl = "multirealm-collector-worker.js",
     collectorWorkerOptions = {type: "module"},
   } = {}) {
-    if (!crossOriginIsolated || typeof SharedArrayBuffer !== "function") {
-      throw new Error("perfetto-everywhere browser capture requires COOP/COEP and SharedArrayBuffer");
-    }
-    this.audioRing = createAudioRing(audioCapacity, sampleRate, quantumFrames);
+    this.audioConfig = {
+      capacityRecords: audioCapacity,
+      chunkBytes: audioCapacity * PERFETTO_RECORD_SIZE,
+      poolSize: 3,
+      sampleRate,
+      quantumFrames,
+    };
     this.sampleRate = sampleRate;
     this.realms = [];
     this.metadata = new Map();
@@ -87,15 +78,34 @@ export class BrowserCaptureController {
     this.collector = new Worker(collectorWorkerUrl, collectorWorkerOptions);
     this.started = false;
     this.finished = false;
-    this.drainTimer = null;
+    this.audioPort = null;
+    this.audioStatus = null;
+    this.collector.addEventListener("message", event => {
+      if (event.data.type === "recycle" && this.audioPort) {
+        this.audioPort.postMessage(event.data, [event.data.buffer]);
+      }
+    });
   }
 
   async start() {
     if (this.started) throw new Error("browser capture already started");
     this.started = true;
     const ready = waitMessage(this.collector, data => data.type === "ready");
-    this.collector.postMessage({type: "start-audio", sab: this.audioRing.sab});
+    this.collector.postMessage({type: "start"});
     await ready;
+  }
+
+  attachAudioPort(port) {
+    if (!this.started || this.audioPort) throw new Error("audio trace port cannot be attached");
+    this.audioPort = port;
+    port.addEventListener("message", event => {
+      if (event.data.type === "trace-chunk") {
+        this.collector.postMessage(event.data, [event.data.buffer]);
+      } else if (event.data.type === "trace-stopped") {
+        this.audioStatus = event.data;
+        this.collector.postMessage({type: "audio-stopped", status: event.data});
+      }
+    });
   }
 
   registerRealm(id, label, ticksPerSecond) {
@@ -113,35 +123,25 @@ export class BrowserCaptureController {
     }
   }
 
-  addCalibration(sample) {
-    this.calibrations.push(sample);
-  }
+  addCalibration(sample) { this.calibrations.push(sample); }
 
   submitRecords(realm, records) {
     if (!this.started || this.finished) throw new Error("capture is not accepting records");
     this.collector.postMessage({type: "records", realm, records}, [records.buffer]);
   }
 
-  startAudioDrain(intervalMs = 2) {
-    if (this.drainTimer !== null) return;
-    this.drainTimer = setInterval(() => this.collector.postMessage({type: "drain"}), intervalMs);
-  }
-
   abort() {
-    if (this.drainTimer !== null) clearInterval(this.drainTimer);
     this.finished = true;
     this.collector.terminate();
   }
 
   async finish() {
     if (!this.started || this.finished) throw new Error("capture cannot be finished in this state");
+    if (this.audioPort && !this.audioStatus) throw new Error("audio producer has not stopped");
     this.finished = true;
-    if (this.drainTimer !== null) clearInterval(this.drainTimer);
     const pending = waitMessage(this.collector, data => data.type === "trace" || data.type === "error");
     this.collector.postMessage({
-      type: "finish",
-      realms: this.realms,
-      metadata: [...this.metadata.values()],
+      type: "finish", realms: this.realms, metadata: [...this.metadata.values()],
       calibrations: this.calibrations,
     });
     const result = await pending;

@@ -28,9 +28,6 @@ function inspect(realm, bytes) {
   return records;
 }
 async function main() {
-  if (!crossOriginIsolated || typeof SharedArrayBuffer !== "function") {
-    throw new Error("cross-origin isolation unavailable");
-  }
   await init();
   const workers = [2, 3].map(realm => new Worker(`ordinary-worker.js?realm=${realm}`, {type: "module"}));
   await Promise.all(workers.map(worker => wait(worker, "ready")));

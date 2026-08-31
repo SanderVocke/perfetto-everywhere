@@ -7,7 +7,7 @@ spanning Window, Dedicated Worker, and AudioWorklet realms.
 one Rust instrumentation API
   ├─ native: Perfetto SDK in-process session → application-owned .pftrace
   ├─ Window/Workers: bounded 48-byte record batches ┐
-  └─ AudioWorklet: nonblocking bounded SAB ring      ├→ collector Worker
+  └─ AudioWorklet: bounded transferable chunk pool      ├→ collector Worker
                                                      └→ standard .pftrace
 optional tracing-subscriber Layer → the same API/backends
 ```
@@ -110,7 +110,7 @@ collector Worker; producers never construct protobuf.
 
 The portable helper [`web/perfetto-browser-runtime.js`](web/perfetto-browser-runtime.js)
 provides `BrowserCaptureController` for realm/metadata/calibration registration,
-ordinary batch submission, AudioWorklet ring draining, finalization, Blob creation,
+ordinary batch submission, AudioWorklet chunk recycling, finalization, Blob creation,
 and download. The complete integration is executable documentation:
 
 ```bash
@@ -123,45 +123,30 @@ and [`docs/browser-runtime.md`](docs/browser-runtime.md). The example emits one
 trace containing Window, two Dedicated Workers, and AudioWorklet tracks plus a
 Window → Worker → AudioWorklet flow.
 
-### Required headers
+### Hosting
 
-SharedArrayBuffer requires a cross-origin-isolated page. Serve the page and all
-same-origin resources with at least:
-
-```text
-Cross-Origin-Opener-Policy: same-origin
-Cross-Origin-Embedder-Policy: require-corp
-```
-
-The included `scripts/serve.py` provides these headers for development.
+Transferable trace chunks use ordinary `ArrayBuffer` ownership and do not require
+COOP/COEP or cross-origin isolation. The included server defaults remain useful
+for testing optional cross-origin embedding behavior.
 
 ## AudioWorklet quick start
 
-Create the SAB before constructing the worklet:
+Configure a bounded recyclable chunk pool before constructing the worklet:
 
 ```js
-import { createAudioRing } from "./perfetto-browser-runtime.js";
-
-const ring = createAudioRing(8192, 48000, 128);
-const wasmModule = await WebAssembly.compileStreaming(
-  fetch("./pkg/audio/perfetto_everywhere_web_bg.wasm"),
-);
-await context.audioWorklet.addModule("perfetto-audio-worklet.js");
+const config = {
+  captureId: 1,
+  capacityRecords: 8192,
+  chunkBytes: 8192 * 48,
+  poolSize: 3,
+};
 const node = new AudioWorkletNode(context, "perfetto-audio", {
-  processorOptions: {
-    sab: ring.sab,
-    wasmModule,
-    realmId: 4,
-    clockId: 104,
-    record: true,
-  },
+  processorOptions: { ...config, wasmModule, realmId: 4, clockId: 104, record: true },
 });
+controller.attachAudioPort(node.port);
 ```
 
-The callback writes only fixed primitive records into a preallocated SPSC ring.
-It never waits, grows storage, encodes protobuf, formats dynamic strings, writes
-files, or posts per event. Full capacity drops a complete group and increments
-an atomic count.
+The callback records into bounded realm-local storage and drains complete groups into preallocated transferable chunks. It never waits, grows producer storage, encodes protobuf, formats dynamic strings, writes files, or posts per event. Pool starvation drops complete groups and remains observable in producer health.
 
 Audio timestamps are exact `currentFrame` values. Logical quantum spans describe
 the audio sample timeline, not unavailable callback CPU-entry time. The page
@@ -220,7 +205,7 @@ tracks, and flows remain direct facade APIs. See
 |---|---|---|
 | Linux native | Automated | `perfetto-sdk` 1.1.1 in-process |
 | `wasm32-unknown-unknown` Window/Worker | Automated in Chromium | bounded ordinary producer |
-| `wasm32-unknown-unknown` AudioWorklet | Automated in Chromium | bounded SAB ring |
+| `wasm32-unknown-unknown` AudioWorklet | Automated in Chromium | bounded transferable chunks |
 | Import-free raw Wasm | Unit/Wasm checks | bounded linear-memory ring |
 | `disabled` | Automated native/WASM | no-op backend |
 | `tracing` | Automated native/ordinary WASM | compatibility layer |

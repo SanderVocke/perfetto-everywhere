@@ -17,7 +17,7 @@ to direct evidence.
 | 2. Unified public API | `perfetto-everywhere-core/{api,metadata,protocol}.rs`, facade target aliases/features, `examples/api-contract.rs`; native/WASM/disabled/tracing feature CI | PASS |
 | 3. Native capture | `perfetto-everywhere-native`, `examples/native-capture`, `scripts/{run-native-example,validate-native}.sh`, native/overflow SQL, two files and overflow health | PASS |
 | 4. Browser multirealm | `BrowserCaptureController`, page/two Workers/AudioWorklet example, collector Worker, `browser-multirealm.pftrace` artifact and SQL validating four realms/all semantics/two-hop flow | PASS |
-| 5. AudioWorklet safety | `web/src/audio.rs`, 64-byte SAB header/48-byte slots, static audit in `docs/audio-worklet.md`, forced overflow, baseline/traced metrics, short/full workflows | PASS |
+| 5. AudioWorklet safety | `web/src/audio.rs`, bounded raw ring/48-byte transferable chunks, static audit in `docs/audio-worklet.md`, forced overflow, baseline/traced metrics, short/full workflows | PASS |
 | 6. Clock correctness | Raw realm ticks, `ClockCalibration`, robust continuous-segment fit, sequence-local ID 64, periodic `ClockSnapshot`, raw residual events, synthetic drift/error tests and clock SQL | PASS |
 | 7. Trace usability/resilience | Trace Processor validators for native/bridge/collector/audio/multirealm; malformed/version/limit/collision tests; health and span repair; UI screenshot/checklist | PASS |
 | 8. `tracing` compatibility | `perfetto-everywhere-tracing`, repeated enter/late-field unit test, native trace/SQL, browser WASM 9-record test, documented counter/flow/AudioWorklet limitations | PASS |
@@ -33,7 +33,7 @@ to direct evidence.
 | Rust crate/workspace | Six publishable crates in root Cargo workspace; verified together by `scripts/package-workspace.sh` |
 | Native in-process file tracing | `CaptureSession`, `CaptureReport::{write_to,write_file}`, native example and SQL |
 | Web page/multiple Worker/worklet trace files | `web/browser-multirealm-example.html`, runtime/collector workers, browser CI artifact |
-| AudioWorklet support | `AudioRingBackend`/`AudioRingProducer`, SAB scripts, 60-second workflow |
+| AudioWorklet support | `AudioChunkProducer`, transferable chunk scripts, 60-second workflow |
 | Unified Rust API where possible | `Tracer<B>`/`TraceBackend`, target-selected `PlatformBackend`; setup differences isolated/documented |
 | `tracing` facade | `PerfettoLayer`/`SharedBackend`, native/browser tests and migration docs |
 | User-friendly docs | README plus `docs/{native,browser-producers,browser-runtime,audio-worklet,tracing-compatibility,support}.md` |
