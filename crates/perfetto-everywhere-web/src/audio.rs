@@ -2,16 +2,15 @@
 mod wasm {
     use js_sys::Uint8Array;
     use perfetto_everywhere_core::{
-        Category, Field, FieldName, FieldValue, FlowAttachment, FlowId, StaticName, TraceBackend,
-        TrackId,
+        Category, FlowAttachment, FlowId, StaticName, TraceBackend, TrackId,
     };
     use perfetto_everywhere_raw::RawRingBackend;
     use std::cell::Cell;
     use wasm_bindgen::prelude::*;
 
     const PROCESS_QUANTUM: StaticName = StaticName::new("audio process quantum");
-    const QUEUE_DEPTH: FieldName = FieldName::new("audio queue depth");
-    const CPU_LOAD: FieldName = FieldName::new("audio cpu load");
+    const QUEUE_DEPTH: StaticName = StaticName::new("audio queue depth");
+    const CPU_LOAD: StaticName = StaticName::new("audio cpu load");
     const GRAPH_INSTALLED: StaticName = StaticName::new("audio graph installed");
     const AUDIO: Category = Category::new("audio");
 
@@ -53,18 +52,20 @@ mod wasm {
             let frame = frame.max(0.0) as u64;
             self.begin_callback(frame, quantum_frames);
             self.backend.set_timestamp(frame);
-            let fields = [
-                Field::new(QUEUE_DEPTH, FieldValue::I64(i64::from(queue_depth))),
-                Field::new(CPU_LOAD, FieldValue::F64(cpu_load)),
-            ];
             let status = self.backend.span_begin(
                 AUDIO,
                 PROCESS_QUANTUM,
                 TrackId::CURRENT,
-                &fields,
+                &[],
                 FlowAttachment::None,
             );
             if status == perfetto_everywhere_core::EmitStatus::Recorded {
+                let _ =
+                    self.backend
+                        .counter_i64(QUEUE_DEPTH, TrackId::CURRENT, i64::from(queue_depth));
+                let _ = self
+                    .backend
+                    .counter_f64(CPU_LOAD, TrackId::CURRENT, cpu_load);
                 self.backend
                     .set_timestamp(frame.saturating_add(u64::from(quantum_frames)));
                 let _ = self.backend.span_end(TrackId::CURRENT);

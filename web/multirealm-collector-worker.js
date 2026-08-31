@@ -71,9 +71,9 @@ self.onmessage = async event => {
     const trace = collector.finish();
     self.postMessage({
       type: "trace", trace, audioRecords,
-      audioCallbacks: audioStatus?.callbacks || 0,
-      dropped: audioStatus?.droppedRecords || 0,
-      discontinuities: audioStatus?.discontinuities || 0,
+      audioCallbacks: Number(audioStatus?.callbacks || 0),
+      dropped: Number(audioStatus?.droppedRecords || 0),
+      discontinuities: Number(audioStatus?.discontinuities || 0),
     }, [trace.buffer]);
   } catch (error) {
     self.postMessage({type: "error", error: error.stack || String(error)});

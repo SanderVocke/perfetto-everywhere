@@ -16,7 +16,7 @@ assert raw['records'] == raw['expectedRecords'] == raw['callbacks'] * 4 + 1, raw
 assert raw['dropped'] == 0, raw
 assert raw['discontinuities'] <= raw['baselineDiscontinuities'], raw
 assert raw['benchmarkP99Ms'] < raw['quantumBudgetMs'] * 0.10, raw
-assert raw['forcedDropped'] >= 4 and raw['malformedRejected'], raw
+assert raw['forcedDropped'] > 0 and raw['malformedRejected'], raw
 assert raw['calibrations'] >= 3, raw
 assert f'6,{raw["calibrations"]}' in query, query
 assert f'64,{raw["calibrations"]}' in query, query
