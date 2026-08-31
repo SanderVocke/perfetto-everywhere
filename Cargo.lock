@@ -300,6 +300,7 @@ version = "0.1.0"
 dependencies = [
  "js-sys",
  "perfetto-everywhere-core",
+ "perfetto-everywhere-raw",
  "wasm-bindgen",
 ]
 
